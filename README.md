@@ -1,1 +1,1 @@
-# clairChatAILib
+# ClairChatAILib
