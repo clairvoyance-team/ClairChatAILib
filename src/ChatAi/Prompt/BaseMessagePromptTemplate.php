@@ -24,4 +24,5 @@ abstract class BaseMessagePromptTemplate
         preg_match_all('/{([a-z|_]+)}/', $template, $variables);
         return $variables[1]; //変数名だけを返す
     }
+
 }

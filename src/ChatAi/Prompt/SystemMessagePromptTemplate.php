@@ -6,6 +6,8 @@ use Clair\Ai\ChatAi\Message\SystemMessage;
 class SystemMessagePromptTemplate extends BaseMessagePromptTemplate
 {
 
+    public readonly string $template;
+
     /**
      * @var string[] $input_variables テンプレート引数
      */
@@ -14,6 +16,7 @@ class SystemMessagePromptTemplate extends BaseMessagePromptTemplate
     public function __construct(
         string $template_str
     ) {
+        $this->template = $template_str;
         $this->input_variables = $this->getTemplateVariables($template_str);
     }
 
