@@ -2,7 +2,7 @@
 
 namespace Clair\Ai\ChatAi\Message\Content;
 
-class ImageContent
+class ImageContent implements Content
 {
     public function __construct(
         public readonly string $image_url

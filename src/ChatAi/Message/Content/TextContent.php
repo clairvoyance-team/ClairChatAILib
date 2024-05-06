@@ -2,7 +2,7 @@
 
 namespace Clair\Ai\ChatAi\Message\Content;
 
-class TextContent
+class TextContent implements Content
 {
     public function __construct(
         public readonly string $content

@@ -1,3 +1,3 @@
 <?php
 
-namespace Clair\Ai\ChatAi;
+namespace Clair\Ai;

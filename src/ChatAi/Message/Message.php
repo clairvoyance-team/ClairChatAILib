@@ -11,7 +11,7 @@ interface Message
      * ログ用に文字列で表すフォーマットを設定する
      * @return string
      */
-    public function formatChatML(): string;
+    public function logFormat(): string;
 
     /**
      * メッセージタイプ

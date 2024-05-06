@@ -13,5 +13,4 @@ interface Content
      */
     public function formatLog(): string;
 
-    public function getType(): string;
 }
