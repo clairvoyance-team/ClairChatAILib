@@ -6,13 +6,26 @@ use Clair\Ai\ChatAi\Message\AIMessage;
 use Clair\Ai\ChatAi\Message\Content\Content;
 use Clair\Ai\ChatAi\Message\HumanMessage;
 use Clair\Ai\ChatAi\Message\Message;
+use Clair\Ai\ChatAi\Message\SystemMessage;
 
 /**
  * 1回のメッセージを表す
  */
-class ChatMessageHistory
+class ChatMessageHistory implements ChatHistory
 {
-    public readonly array $messages;
+
+    /**
+     * @param Message[] $messages
+     */
+    public function __construct(
+        public array $messages = []
+    ) {
+        foreach ($this->messages as $message) {
+            if (!$message instanceof Message) {
+                throw new \InvalidArgumentException("第一引数はMessage[]である必要があります");
+            }
+        }
+    }
 
     /**
      * メッセージを追加

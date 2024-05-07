@@ -2,9 +2,13 @@
 namespace Clair\Ai\ChatAi\Prompt;
 
 use Clair\Ai\ChatAi\Message\Message;
+use Clair\Ai\ChatAi\Prompt\Exception\MissingInputVariablesException;
 
 abstract class BaseMessagePromptTemplate
 {
+    //-------------------------------------------------------------------------
+    //コンストラクタの中でgetTemplateVariablesを呼び出し、input_variablesを確定すること！
+    //-------------------------------------------------------------------------
 
     /**
      * テンプレートからテンプレート変数を推定し、変数名を返す
@@ -28,6 +32,7 @@ abstract class BaseMessagePromptTemplate
     /**
      * テンプレートのテンプレート変数に入力値を代入し、Message型で返す
      * @param array{string: mixed} $arguments 入力値 変数名: 入力値
+     * @throws MissingInputVariablesException
      * @return Message[]
      */
     abstract public function formatMessages(array $arguments = []): array;

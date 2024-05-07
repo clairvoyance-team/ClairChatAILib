@@ -21,6 +21,9 @@ class MessagePromptTest extends TestCase
         $this->assertSame($expected_variables, $message_template->input_variables);
     }
 
+    /**
+     * @throws MissingInputVariablesException
+     */
     #[TestDox("テンプレート変数に入力値を代入したSystemMessageが返される")]
     public function test_canAssign() {
         $template = "あなたは {input_language} を {output} に翻訳するアシスタントです。";
@@ -47,5 +50,6 @@ class MessagePromptTest extends TestCase
         $input_variables = ["input_language" => "英語"];
         $message_template->formatMessages($input_variables);
     }
+
 }
 

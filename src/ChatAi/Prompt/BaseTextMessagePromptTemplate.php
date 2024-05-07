@@ -14,16 +14,26 @@ abstract class BaseTextMessagePromptTemplate extends BaseMessagePromptTemplate
      */
     public readonly array $input_variables;
 
+    /**
+     * メモ用名前
+     * @var string|null
+     */
+    public readonly ?string $name;
+
     public function __construct(
-        string $template_str
+        string $template_str,
+        ?string $name = null
     ) {
         $this->template = $template_str;
         $this->input_variables = $this->getTemplateVariables($template_str);
+        $this->name = $name;
     }
 
     /**
      * @param array{string: mixed} $arguments テンプレート変数に入力する値 変数名: 入力値
      * @return Message[]
+     *
+     * @throws MissingInputVariablesException
      */
     abstract public function formatMessages(array $arguments = []): array;
 
