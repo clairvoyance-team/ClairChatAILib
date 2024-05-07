@@ -17,6 +17,9 @@ class ChatPromptTemplate
      */
     protected array $messages;
 
+    /**
+     * @param (BaseMessagePromptTemplate|Message)[] $messages
+     */
     public function __construct(array $messages)
     {
         $input_variables = [];
@@ -26,7 +29,7 @@ class ChatPromptTemplate
             }
 
             if (!$message instanceof BaseMessagePromptTemplate && !$message instanceof Message) {
-                throw new \InvalidArgumentException("第一引数はBaseMessagePromptTemplateかMessageの配列である必要があります");
+                throw new \InvalidArgumentException("第一引数の配列の要素はBaseMessagePromptTemplateかMessageである必要があります");
             }
         }
 
@@ -45,6 +48,7 @@ class ChatPromptTemplate
     }
 
     /**
+     * チャット履歴をプロンプトの最後に足す
      * @param ChatHistory $chatHistory
      * @return void
      */
@@ -54,6 +58,7 @@ class ChatPromptTemplate
     }
 
     /**
+     * 入力値を代入したプロンプトを作成する
      * @param array{string: mixed} $arguments
      * @throws MissingInputVariablesException
      * @return ChatPromptValue
@@ -65,7 +70,7 @@ class ChatPromptTemplate
             if ($message instanceof BaseMessagePromptTemplate) {
                 $format_messages = array_merge($format_messages, $message->formatMessages($arguments));
             } else {
-                $format_messages = array_merge($format_messages, $message);
+                $format_messages = array_merge($format_messages, [$message]);
             }
         }
 

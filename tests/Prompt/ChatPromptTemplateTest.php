@@ -28,7 +28,9 @@ class ChatPromptTemplateTest extends TestCase
         $template_human = "以下の {input_language} を翻訳してください。また{num}文字以内に収めてください。";
         $human_message_template = new HumanTextMessagePromptTemplate($template_human);
 
-        $this->chatPrompt = new ChatPromptTemplate([$system_message_template, $human_message_template]);
+        $human_message = new HumanMessage("I love cats.", "alice");
+
+        $this->chatPrompt = new ChatPromptTemplate([$system_message_template, $human_message_template, $human_message]);
     }
 
     #[TestDox("正しいテンプレート変数の取得")]
@@ -47,7 +49,8 @@ class ChatPromptTemplateTest extends TestCase
 
         $expected_obj = new ChatPromptValue([
             new SystemMessage("あなたは 英語 を フランス語 に翻訳するアシスタントです。"),
-            new HumanMessage("以下の 英語 を翻訳してください。また200文字以内に収めてください。")
+            new HumanMessage("以下の 英語 を翻訳してください。また200文字以内に収めてください。"),
+            new HumanMessage("I love cats.", "alice")
         ]);
 
         $this->assertInstanceOf(ChatPromptValue::class, $result);
@@ -76,10 +79,11 @@ class ChatPromptTemplateTest extends TestCase
         $messages = $this->chatPrompt->getPromptMessages();
         $this->assertInstanceOf(SystemMessagePromptTemplate::class, $messages[0]);
         $this->assertInstanceOf(HumanTextMessagePromptTemplate::class, $messages[1]);
-        $this->assertInstanceOf(AIMessage::class, $messages[2]);
-        $this->assertEquals(new AIMessage("AIです"), $messages[2]);
-        $this->assertInstanceOf(HumanMessage::class, $messages[3]);
-        $this->assertEquals(new HumanMessage("Userです"), $messages[3]);
+        $this->assertInstanceOf(HumanMessage::class, $messages[2]);
+        $this->assertInstanceOf(AIMessage::class, $messages[3]);
+        $this->assertEquals(new AIMessage("AIです"), $messages[3]);
+        $this->assertInstanceOf(HumanMessage::class, $messages[4]);
+        $this->assertEquals(new HumanMessage("Userです"), $messages[4]);
     }
 
 }
