@@ -1,0 +1,50 @@
+<?php
+namespace Clair\Ai\ChatAi\Prompt;
+
+use Clair\Ai\ChatAi\Message\Message;
+use Clair\Ai\ChatAi\Prompt\Exception\MissingInputVariablesException;
+
+abstract class BaseTextMessagePromptTemplate extends BaseMessagePromptTemplate
+{
+
+    public readonly string $template;
+
+    /**
+     * @var string[] $input_variables テンプレート引数
+     */
+    public readonly array $input_variables;
+
+    public function __construct(
+        string $template_str
+    ) {
+        $this->template = $template_str;
+        $this->input_variables = $this->getTemplateVariables($template_str);
+    }
+
+    /**
+     * @param array{string: mixed} $arguments テンプレート変数に入力する値 変数名: 入力値
+     * @return Message[]
+     */
+    abstract public function formatMessages(array $arguments = []): array;
+
+
+    /**
+     * テンプレートのテンプレート変数に入力値を代入する
+     * @param array{string: mixed} $arguments 入力値 変数名: 入力値
+     * @return string
+     *
+     * @throws MissingInputVariablesException
+     */
+    protected function assign(array $arguments = []): string
+    {
+        $assign_result = $this->template;
+        foreach ($this->input_variables as $variable) {
+            if (!array_key_exists($variable, $arguments)) throw new MissingInputVariablesException();
+
+            $assign_result = preg_replace("/{{$variable}}/", $arguments[$variable], $assign_result);
+        }
+
+        return $assign_result;
+    }
+
+}
