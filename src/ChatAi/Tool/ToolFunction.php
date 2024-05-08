@@ -2,6 +2,9 @@
 
 namespace Clair\Ai\ChatAi\Tool;
 
+use ReflectionClass;
+use ReflectionException;
+
 class ToolFunction
 {
 
@@ -34,8 +37,16 @@ class ToolFunction
         }
     }
 
+    /**
+     * @param $class_name
+     * @param $method_name
+     * @return void
+     * @throws ReflectionException
+     */
     static public function readMethod($class_name, $method_name) {
-        //$reflector = new \ReflectionClass($class_name);
-        //$method = $reflector->getMethod($method_name);
+        $reflector = new ReflectionClass($class_name);
+        $method = $reflector->getMethod($method_name);
+
+        $php_doc = $method->getDocComment();
     }
 }

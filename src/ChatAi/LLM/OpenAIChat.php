@@ -28,9 +28,4 @@ class OpenAIChat
         $parameter = new OpenAIChatCompletionParameters($this->params);
         return new OpenAIResult();
     }
-
-
-    public function update_emotions(string $love, string $happiness, string $disgust, string $fear) {
-
-    }
 }
