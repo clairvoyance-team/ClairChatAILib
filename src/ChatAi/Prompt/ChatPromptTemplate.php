@@ -3,6 +3,7 @@
 namespace Clair\Ai\ChatAi\Prompt;
 
 use Clair\Ai\ChatAi\ChatHistory\ChatHistory;
+use Clair\Ai\ChatAi\Message\HumanMessage;
 use Clair\Ai\ChatAi\Message\Message;
 use Clair\Ai\ChatAi\Message\SystemMessage;
 use Clair\Ai\ChatAi\Prompt\Exception\MissingInputVariablesException;
@@ -40,6 +41,17 @@ class ChatPromptTemplate
     }
 
     /**
+     * 単一テンプレートから簡単にChatPromptTemplateを作成する
+     * @param string $template
+     * @return ChatPromptTemplate
+     */
+    public static function fromTemplate(string $template): ChatPromptTemplate
+    {
+        $human_message_template = new HumanTextMessagePromptTemplate($template);
+        return new ChatPromptTemplate([$human_message_template]);
+    }
+
+    /**
      * ほぼデバッグ用
      * @return (BaseMessagePromptTemplate|Message)[]
      */
@@ -59,7 +71,7 @@ class ChatPromptTemplate
 
     /**
      * 入力値を代入したプロンプトを作成する
-     * @param array{string: mixed} $arguments
+     * @param array<string, mixed> $arguments
      * @throws MissingInputVariablesException
      * @return ChatPromptValue
      */

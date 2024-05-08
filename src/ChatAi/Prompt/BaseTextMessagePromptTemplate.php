@@ -30,7 +30,7 @@ abstract class BaseTextMessagePromptTemplate extends BaseMessagePromptTemplate
     }
 
     /**
-     * @param array{string: mixed} $arguments テンプレート変数に入力する値 変数名: 入力値
+     * @param array<string, mixed> $arguments テンプレート変数に入力する値 変数名: 入力値
      * @return Message[]
      *
      * @throws MissingInputVariablesException
@@ -40,7 +40,7 @@ abstract class BaseTextMessagePromptTemplate extends BaseMessagePromptTemplate
 
     /**
      * テンプレートのテンプレート変数に入力値を代入する
-     * @param array{string: mixed} $arguments 入力値 変数名: 入力値
+     * @param array<string, mixed> $arguments 入力値 変数名: 入力値
      * @return string
      *
      * @throws MissingInputVariablesException

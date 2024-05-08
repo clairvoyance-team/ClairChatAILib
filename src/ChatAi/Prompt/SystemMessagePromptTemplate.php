@@ -8,7 +8,7 @@ class SystemMessagePromptTemplate extends BaseTextMessagePromptTemplate
 {
 
     /**
-     * @param array{string: mixed} $arguments
+     * @param array<string, mixed> $arguments
      * @return SystemMessage[]
      * @throws MissingInputVariablesException
      */

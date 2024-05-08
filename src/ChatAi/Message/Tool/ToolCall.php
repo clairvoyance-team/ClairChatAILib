@@ -6,7 +6,7 @@ class ToolCall
 {
     /**
      * @param string $name
-     * @param array{string: mixed} $args
+     * @param array $args
      */
     public function __construct(
         public readonly string $name,

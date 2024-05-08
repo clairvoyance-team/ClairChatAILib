@@ -24,14 +24,14 @@ abstract class BaseMessagePromptTemplate
 
     /**
      * テンプレートのテンプレート変数に入力値を代入する
-     * @param array{string: mixed} $arguments 入力値 変数名: 入力値
+     * @param array<string, mixed> $arguments 入力値 変数名: 入力値
      * @return string
      */
     abstract protected function assign(array $arguments = []): string;
 
     /**
      * テンプレートのテンプレート変数に入力値を代入し、Message型で返す
-     * @param array{string: mixed} $arguments 入力値 変数名: 入力値
+     * @param array<string, mixed> $arguments 入力値 変数名: 入力値
      * @throws MissingInputVariablesException
      * @return Message[]
      */

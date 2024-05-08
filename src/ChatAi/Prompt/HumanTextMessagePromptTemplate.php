@@ -8,7 +8,7 @@ class HumanTextMessagePromptTemplate extends BaseTextMessagePromptTemplate
 {
 
     /**
-     * @param array{string: mixed} $arguments
+     * @param array<string, mixed> $arguments
      * @return HumanMessage[]
      * @throws MissingInputVariablesException
      */

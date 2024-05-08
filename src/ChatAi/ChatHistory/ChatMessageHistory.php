@@ -2,11 +2,11 @@
 
 namespace Clair\Ai\ChatAi\ChatHistory;
 
+use Clair\Ai\ChatAi\Exception\InvalidArgumentException;
 use Clair\Ai\ChatAi\Message\AIMessage;
 use Clair\Ai\ChatAi\Message\Content\Content;
 use Clair\Ai\ChatAi\Message\HumanMessage;
 use Clair\Ai\ChatAi\Message\Message;
-use Clair\Ai\ChatAi\Message\SystemMessage;
 
 /**
  * 1回のメッセージを表す
@@ -22,7 +22,7 @@ class ChatMessageHistory implements ChatHistory
     ) {
         foreach ($this->messages as $message) {
             if (!$message instanceof Message) {
-                throw new \InvalidArgumentException("第一引数はMessage[]である必要があります");
+                throw new InvalidArgumentException("第一引数はMessage[]である必要があります");
             }
         }
     }

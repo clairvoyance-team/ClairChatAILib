@@ -2,19 +2,24 @@
 
 namespace Clair\Ai\ChatAi\Prompt;
 
-use Clair\Ai\ChatAi\ChatHistory\ChatHistory;
+use Clair\Ai\ChatAi\Exception\InvalidArgumentException;
 use Clair\Ai\ChatAi\Message\Message;
 
 class ChatPromptValue
 {
 
+    public readonly array $messages;
+
     /**
      * @param Message[] $messages
      */
     public function __construct(
-        public readonly array $messages
+        array $messages
     )
     {
+        foreach ($messages as $message) {
+            if (!$message instanceof Message) throw new InvalidArgumentException();
+        }
     }
 
     /**
