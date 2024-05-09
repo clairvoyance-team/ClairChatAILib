@@ -2,15 +2,18 @@
 
 namespace Clair\Ai\ChatAi\Tool;
 
+/**
+ *  case JSONのtype : PHPの型
+ */
 enum JSONTypeEnum :string
 {
     case Array = 'array';
 
-    case Boolean = 'boolean';
+    case Boolean = 'bool';
 
-    case Integer = 'integer';
+    case Integer = 'int';
 
-    case Number = 'number';
+    case Number = 'float';
 
     case Null = 'null';
 
