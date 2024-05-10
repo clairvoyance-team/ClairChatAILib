@@ -7,16 +7,29 @@ use Clair\Ai\ChatAi\Message\Content\TextContent;
 
 class AIMessage implements Message
 {
-    public readonly Content $content;
+
+    /**
+     * @var Content[]
+     */
+    public readonly array $contents;
 
     public readonly ?string $name;
     private string $type = "ai";
 
+    /**
+     * @param string|Content[] $contents デフォルトはstringという意味
+     * @param string|null $name
+     */
     public function __construct(
-        string $content,
-        ?string $name = null
+        string|array $contents,
+        ?string      $name = null
     ) {
-        $this->content = new TextContent($content);
+
+        if (is_string($contents)) {
+            $this->contents[] = new TextContent($contents);
+        } else {
+            $this->contents = $contents;
+        }
         $this->name = $name;
     }
 
@@ -26,7 +39,10 @@ class AIMessage implements Message
      */
     public function logFormat(): string
     {
-        return "({$this->type}){$this->name}: {$this->content->formatLog()}\n";
+        $contents_format_arr = array_map(fn($val) :string => $val->formatLog(), $this->contents);
+        $content = implode("\n", $contents_format_arr);
+
+        return "({$this->type}){$this->name}: {$content}\n";
     }
 
     public function getType(): string

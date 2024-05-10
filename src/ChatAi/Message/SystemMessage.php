@@ -20,6 +20,7 @@ class SystemMessage implements Message
         $this->content = new TextContent($content);
         $this->name = $name;
     }
+
     /**
      * ログ用に文字列で表すフォーマットを設定する
      * @return string

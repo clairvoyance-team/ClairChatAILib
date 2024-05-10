@@ -8,6 +8,9 @@ use Clair\Ai\ChatAi\Message\Message;
 class ChatPromptValue
 {
 
+    /**
+     * @var Message[]
+     */
     public readonly array $messages;
 
     /**

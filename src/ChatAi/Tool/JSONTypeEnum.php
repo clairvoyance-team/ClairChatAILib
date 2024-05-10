@@ -21,4 +21,9 @@ enum JSONTypeEnum :string
 
     case String = 'string';
 
+    public function getJsonType(): string
+    {
+        return strtolower($this->name);
+    }
+
 }

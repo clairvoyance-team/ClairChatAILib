@@ -2,7 +2,7 @@
 
 namespace Clair\Ai\ChatAi\Tool;
 
-class ToolParameter
+class ToolFunctionParameter
 {
 
     public function __construct(
@@ -12,7 +12,7 @@ class ToolParameter
         public readonly JSONTypeEnum $type = JSONTypeEnum::String,
     ) {}
 
-    static public function fromArray(array $parameter): self
+    public static function fromArray(array $parameter): self
     {
         return new self(
             $parameter['name'],
@@ -20,5 +20,19 @@ class ToolParameter
             $parameter['required'] ?? true,
             $parameter['type'] ? JSONTypeEnum::from($parameter['type']) : JSONTypeEnum::String
         );
+    }
+
+    public function convertToJsonArr(): array
+    {
+        $parameter_arr = [];
+        $parameter_arr["type"] = $this->type->getJsonType();
+
+        if (!is_null($this->description)) {
+            $parameter_arr["description"] = $this->description;
+        }
+
+        $parameters_json_arr[$this->name] = $parameter_arr;
+
+        return $parameters_json_arr;
     }
 }

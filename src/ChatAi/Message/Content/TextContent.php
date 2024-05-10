@@ -9,6 +9,13 @@ class TextContent implements Content
     ) {
     }
 
+    /**
+     * @return array{text: string}
+     */
+    public function getContents(): array
+    {
+        return ["text" => $this->content];
+    }
 
     /**
      * ログ用に文字列で表すフォーマットを設定する

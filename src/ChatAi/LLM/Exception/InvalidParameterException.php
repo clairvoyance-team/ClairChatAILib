@@ -2,6 +2,6 @@
 
 namespace Clair\Ai\ChatAi\LLM\Exception;
 
-class InvalidParameterException extends \Exception {
+class InvalidParameterException extends \LogicException {
 
 }
