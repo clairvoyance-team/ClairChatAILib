@@ -22,7 +22,7 @@ class HumanMessage implements Message
         ?string $name = null
     ) {
         if (is_string($content)) {
-            $this->contents[] = new TextContent($content);
+            $this->contents = [ new TextContent($content) ];
         } else {
             $this->contents = $content;
         }

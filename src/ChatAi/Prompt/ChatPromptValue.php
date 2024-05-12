@@ -23,13 +23,7 @@ class ChatPromptValue
         foreach ($messages as $message) {
             if (!$message instanceof Message) throw new InvalidArgumentException();
         }
+        $this->messages = $messages;
     }
 
-    /**
-     * @return Message[]
-     */
-    public function toMessages(): array
-    {
-        return $this->messages;
-    }
 }

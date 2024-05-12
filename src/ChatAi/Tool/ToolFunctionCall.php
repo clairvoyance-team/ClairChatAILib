@@ -9,7 +9,7 @@ class ToolFunctionCall implements ToolCall
 
     /**
      * @param string $name
-     * @param array $args
+     * @param array<string, mixed> $args <引数名, 値>
      * @param ToolFunction $function
      */
     public function __construct(

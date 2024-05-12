@@ -10,11 +10,11 @@ class ImageContent implements Content
      * @throws MissingDataException
      */
     public function __construct(
-        public readonly ?string $image_url,
-        public readonly ?string $data,
-        public readonly ?string $image_type
+        public readonly ?string $image_url = null,
+        public readonly ?string $data = null,
+        public readonly ?string $image_type = null
     ) {
-        if (is_null($this->image_url) && is_null($data)) {
+        if (is_null($this->image_url) && (is_null($data) || is_null($this->image_type))) {
             throw new MissingDataException("URLか画像データ自体が必要です。");
         }
     }
