@@ -2,22 +2,23 @@
 
 namespace Clair\Ai\ChatAi\Message;
 
+use Clair\Ai\ChatAi\LLM\ChatLLM;
 use Clair\Ai\ChatAi\Message\Content\Content;
 use Clair\Ai\ChatAi\Message\Content\TextContent;
 
 class SystemMessage implements Message
 {
-    public readonly Content $content;
+    public readonly Content $contents;
 
     public readonly ?string $name;
     private string $type = "system";
 
 
     public function __construct(
-        string $content,
+        string $contents,
         ?string $name = null
     ) {
-        $this->content = new TextContent($content);
+        $this->contents = new TextContent($contents);
         $this->name = $name;
     }
 
@@ -27,7 +28,7 @@ class SystemMessage implements Message
      */
     public function logFormat(): string
     {
-        return "({$this->type}){$this->name}: {$this->content->formatLog()}\n";
+        return "({$this->type}){$this->name}: {$this->contents->formatLog()}\n";
     }
 
     public function getType(): string

@@ -18,4 +18,5 @@ interface Message
      * @return string
      */
     public function getType(): string;
+
 }

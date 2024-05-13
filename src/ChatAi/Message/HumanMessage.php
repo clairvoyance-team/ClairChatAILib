@@ -2,7 +2,9 @@
 
 namespace Clair\Ai\ChatAi\Message;
 
+use Clair\Ai\ChatAi\LLM\ChatLLM;
 use Clair\Ai\ChatAi\Message\Content\Content;
+use Clair\Ai\ChatAi\Message\Content\ImageContent;
 use Clair\Ai\ChatAi\Message\Content\TextContent;
 
 class HumanMessage implements Message
@@ -14,17 +16,17 @@ class HumanMessage implements Message
     private string $type = "human";
 
     /**
-     * @param string|Content[] $content デフォルトはstringという意味
+     * @param string|Content[] $contents デフォルトはstringという意味
      * @param string|null $name
      */
     public function __construct(
-        string|array $content,
-        ?string $name = null
+        string|array $contents,
+        ?string      $name = null
     ) {
-        if (is_string($content)) {
-            $this->contents = [ new TextContent($content) ];
+        if (is_string($contents)) {
+            $this->contents = [ new TextContent($contents) ];
         } else {
-            $this->contents = $content;
+            $this->contents = $contents;
         }
 
         $this->name = $name;

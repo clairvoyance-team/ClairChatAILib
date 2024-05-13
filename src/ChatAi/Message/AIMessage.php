@@ -2,6 +2,7 @@
 
 namespace Clair\Ai\ChatAi\Message;
 
+use Clair\Ai\ChatAi\LLM\ChatLLM;
 use Clair\Ai\ChatAi\Message\Content\Content;
 use Clair\Ai\ChatAi\Message\Content\TextContent;
 
@@ -26,7 +27,7 @@ class AIMessage implements Message
     ) {
 
         if (is_string($contents)) {
-            $this->contents[] = new TextContent($contents);
+            $this->contents = [ new TextContent($contents) ];
         } else {
             $this->contents = $contents;
         }

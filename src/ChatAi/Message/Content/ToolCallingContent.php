@@ -3,6 +3,7 @@
 
 namespace Clair\Ai\ChatAi\Message\Content;
 
+use Clair\Ai\ChatAi\LLM\ChatLLM;
 use Clair\Ai\ChatAi\Tool\ToolCall;
 use Clair\Ai\ChatAi\Tool\ToolType;
 
@@ -16,6 +17,17 @@ class ToolCallingContent implements Content
     {
     }
 
+    public function convertAPIRequest(ChatLLM $llm): array
+    {
+        $function = $this->tool_call->toJsonArr();
+        return $llm->convertToolCallingContentToArr([
+            "tool_type" => $this->tool_type->value,
+            "tool_call_id" => $this->tool_call_id,
+            "tool_name" => $function["name"],
+            "tool_args" => $function["args"]
+        ]);
+    }
+
     /**
      * @return array{tool_call_id: string, type: string, tool_name: string, tool_args: array}
      */
@@ -23,8 +35,9 @@ class ToolCallingContent implements Content
     {
         $function = $this->tool_call->toJsonArr();
         return [
+            "type"     => "tool",
+            "tool_type" => $this->tool_type->value,
             "tool_call_id" => $this->tool_call_id,
-            "type" => $this->tool_type->value,
             "tool_name" => $function["name"],
             "tool_args" => $function["args"]
         ];

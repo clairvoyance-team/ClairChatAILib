@@ -147,7 +147,7 @@ class ToolFunctionTest extends TestCase
             $test_instance
         );
 
-        $json1 = $example1->toJsonArr();
+        $json1 = $example1->toRequestArr();
         $expected1 = [
             "type" => "function",
             "function" => [
@@ -189,7 +189,7 @@ class ToolFunctionTest extends TestCase
             ],
             "tests\Tool\AIToolDefinedClass"
         );
-        $json2 = $example2->toJsonArr();
+        $json2 = $example2->toRequestArr();
 
         $expected2 = [
             "type" => "function",

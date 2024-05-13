@@ -8,7 +8,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionParameter;
 
-class ToolFunction
+class ToolFunction implements Tool
 {
     public const ToolType = ToolType::Function;
 
@@ -173,42 +173,40 @@ class ToolFunction
     }
 
     /**
-     * 自身をJSONに変換する
+     * 自身をに変換する
      * @return array
      */
-    public function toJsonArr() :array
+    public function toRequestArr() :array
     {
-        $function_json_arr["name"] = $this->name;
+        $function_request_arr["name"] = $this->name;
 
         if (!is_null($this->description)) {
-            $function_json_arr["description"] = $this->description;
+            $function_request_arr["description"] = $this->description;
         }
 
         //引数の部分
         if (!is_null($this->parameters)) {
             $required_parameter_arr = [];
-            $parameters_json_arr = [];
+            $parameters_request_arr = [];
             foreach ($this->parameters as $parameter) {
-                $parameters_json_arr = array_merge($parameters_json_arr, $parameter->convertToJsonArr());
+                $parameters_request_arr = array_merge($parameters_request_arr, $parameter->convertToJsonArr());
 
                 if ($parameter->required) {
                     $required_parameter_arr[] = $parameter->name;
                 }
             }
 
-            $function_json_arr["parameters"] = [
+            $function_request_arr["parameters"] = [
                 "type" => "object",
-                "properties" => $parameters_json_arr,
+                "properties" => $parameters_request_arr,
                 "required" => $required_parameter_arr
             ];
         }
 
-        $json_arr = [
+        return [
             "type" => "function",
-            "function" => $function_json_arr
+            "function" => $function_request_arr
         ];
-
-        return $json_arr;
     }
 
     /**

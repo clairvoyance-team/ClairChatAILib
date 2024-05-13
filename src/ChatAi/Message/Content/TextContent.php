@@ -2,6 +2,8 @@
 
 namespace Clair\Ai\ChatAi\Message\Content;
 
+use Clair\Ai\ChatAi\LLM\ChatLLM;
+
 class TextContent implements Content
 {
     public function __construct(
@@ -9,12 +11,20 @@ class TextContent implements Content
     ) {
     }
 
+    public function convertAPIRequest(ChatLLM $llm) :array
+    {
+        return $llm->convertTextContentToArr(["text" => $this->content]);
+    }
+
     /**
      * @return array{text: string}
      */
     public function getContents(): array
     {
-        return ["text" => $this->content];
+        return [
+            "type" => "text",
+            "text" => $this->content
+        ];
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Clair\Ai\ChatAi\Message\Content;
 
+use Clair\Ai\ChatAi\LLM\ChatLLM;
 use Clair\Ai\ChatAi\Message\Exception\MissingDataException;
 
 class ImageContent implements Content
@@ -19,12 +20,22 @@ class ImageContent implements Content
         }
     }
 
+    public function convertAPIRequest(ChatLLM $llm): array
+    {
+        return $llm->convertImageContentToArr([
+            "image_url" => $this->image_url,
+            "data" => $this->data,
+            "image_type" => $this->image_type
+        ]);
+    }
+
     /**
      * @return array{image_url: string, data: string, image_type: string}
      */
     public function getContents(): array
     {
         return [
+            "type" => "image",
             "image_url" => $this->image_url,
             "data" => $this->data,
             "image_type" => $this->image_type

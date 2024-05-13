@@ -54,4 +54,15 @@ class OpenAIChatCompletionParameters implements Parameters
             }
         }
     }
+
+    public function toRequestArr(): array
+    {
+        $request = [];
+        foreach ($this as $property_name => $value) {
+            if ($property_name == "model_name") continue;
+            $request[$property_name] = $value;
+        }
+
+        return $request;
+    }
 }

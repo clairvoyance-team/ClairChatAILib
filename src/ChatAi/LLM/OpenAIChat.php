@@ -4,24 +4,21 @@ namespace Clair\Ai\ChatAi\LLM;
 
 use Clair\Ai\ChatAi\LLM\Exception\InvalidParameterException;
 use Clair\Ai\ChatAi\Message\AIMessage;
-use Clair\Ai\ChatAi\Message\Content\ImageContent;
 use Clair\Ai\ChatAi\Message\Content\TextContent;
 use Clair\Ai\ChatAi\Message\Content\ToolCallingContent;
 use Clair\Ai\ChatAi\Message\HumanMessage;
 use Clair\Ai\ChatAi\Message\SystemMessage;
-use Clair\Ai\ChatAi\Message\ToolCallingMessage;
 use Clair\Ai\ChatAi\Message\ToolMessage;
 use Clair\Ai\ChatAi\Prompt\ChatPromptValue;
 
 use Clair\Ai\ChatAi\Tool\Tool;
 use OpenAI;
 
-class OpenAIChat
+class OpenAIChat implements ChatLLM
 {
 
     public function __construct(
-        private readonly string $api_key,
-        public readonly ?array  $params=null
+        private readonly OpenAI\Client $client,
     ) {}
 
 
@@ -31,11 +28,16 @@ class OpenAIChat
      * @return LLMResult
      * @throws InvalidParameterException
      */
-    public function chatCompletion(ChatPromptValue $prompt, array $tools=null): LLMResult
+    public function chatCompletion(OpenAIChatCompletionParameters $params, ChatPromptValue $prompt, array $tools=null): LLMResult
     {
-        $client = OpenAI::client($this->api_key);
-        $parameter = new OpenAIChatCompletionParameters($this->params);
+        $request_arr = $params->toRequestArr();
+        $request_arr["model"] = $params->model_name;
+        $request_arr["messages"] = $this->convertChatPromptToArr($prompt);
+        if (!is_null($tools)) {
+            $request_arr["tools"] = array_map(fn($tool) => $tool->toRequestArr(), $tools);
+        }
 
+        $response = $this->client->chat()->create($request_arr);
 
         return new OpenAIResult();
     }
@@ -50,15 +52,15 @@ class OpenAIChat
         //APIリクエストのmessages用のArr
         $request_messages_arr = [];
         foreach ($prompt->messages as $message) {
-            if ($message instanceof SystemMessage) {
-                $request_messages_arr = array_merge($request_messages_arr, $this->convertSystemMessageToArr($message));
-            } else if ($message instanceof HumanMessage) {
-                $request_messages_arr = array_merge($request_messages_arr, $this->convertHumanMessageToArr($message));
-            } else if ($message instanceof AIMessage) {
-                $request_messages_arr = array_merge($request_messages_arr, $this->convertAIMessageToArr($message));
-            } else if ($message instanceof ToolMessage) {
-                $request_messages_arr = array_merge($request_messages_arr, $this->convertToolMessageToArr($message));
-            }
+
+            $convert_message_arr = match ($message::class) {
+                SystemMessage::class => $this->convertSystemMessageToArr($message),
+                HumanMessage::class  => $this->convertHumanMessageToArr($message),
+                AIMessage::class     => $this->convertAIMessageToArr($message),
+                ToolMessage::class   => $this->convertToolMessageToArr($message)
+            };
+
+            $request_messages_arr = array_merge($request_messages_arr, $convert_message_arr);
         }
 
         return $request_messages_arr;
@@ -69,9 +71,10 @@ class OpenAIChat
      * @param SystemMessage $message
      * @return array
      */
-    private function convertSystemMessageToArr(SystemMessage $message): array
+    public function convertSystemMessageToArr(SystemMessage $message): array
     {
-        $arr = ["role" => "system", "content" => $message->content->content];
+        $text = $message->contents->convertAPIRequest($this)["text"];
+        $arr = ["role" => "system", "content" => $text];
         if (!is_null($message->name)) {
             $arr["name"] = $message->name;
         }
@@ -85,24 +88,11 @@ class OpenAIChat
      * @param HumanMessage $message
      * @return array
      */
-    private function convertHumanMessageToArr(HumanMessage $message): array
+    public function convertHumanMessageToArr(HumanMessage $message): array
     {
         $convert_contents = [];
         foreach ($message->contents as $content) {
-            if ($content instanceof TextContent) {
-                $convert_contents[] = ["type" => "text", "text" => $content->getContents()["text"]];
-
-            } else if ($content instanceof ImageContent) {
-                $info = $content->getContents();
-                $url = "";
-                if ($info["image_url"]) {
-                    $url = $info["image_url"];
-                } else if ($info["data"]) {
-                    $url = "data:{$info["image_type"]};base64,{$info["data"]}";
-                }
-
-                $convert_contents[] = ["type" => "image_url", "image_url" => ["url" => $url]];
-            }
+            $convert_contents[] = $content->convertAPIRequest($this);
         }
 
         $arr = ["role" => "user", "content" => $convert_contents];
@@ -119,25 +109,16 @@ class OpenAIChat
      * @param AIMessage $message
      * @return array
      */
-    private function convertAIMessageToArr(AIMessage $message): array
+    public function convertAIMessageToArr(AIMessage $message): array
     {
         $content_arr = [];
         $tool_calls = [];
         foreach ($message->contents as $content) {
             if ($content instanceof TextContent) {
-                $content_arr[] = $content->getContents()["text"];
+                $content_arr[] = $content->convertAPIRequest($this)["text"];
 
             } else if ($content instanceof ToolCallingContent) {
-                $tool_content = $content->getContents();
-
-                $tool_calls[] = [
-                    "id" => $tool_content["tool_call_id"],
-                    "type" => $tool_content["type"],
-                    "function" => [
-                        "name" => $tool_content["tool_name"],
-                        "arguments" => $tool_content["tool_args"]
-                    ]
-                ];
+                $tool_calls[] = $content->convertAPIRequest($this);
             }
         }
 
@@ -179,8 +160,49 @@ class OpenAIChat
      */
     private function convertToolMessageToArr(ToolMessage $message): array
     {
-        $arr = ["role" => "tool", "content" => $message->content->content, "tool_call_id" => $message->tool_call_id];
+        $text = $message->contents->convertAPIRequest($this)["text"];
+        $arr = ["role" => "tool", "content" => $text, "tool_call_id" => $message->tool_call_id];
         //messagesの中身として、配列でラップして返す
         return [$arr];
+    }
+
+    /**
+     * @param array{text: string} $content_data
+     * @return array
+     */
+    public function convertTextContentToArr(array $content_data): array
+    {
+        return ["type" => "text", "text" => $content_data["text"]];
+    }
+
+    /**
+     * @param array{image_url: string, data: string, image_type: string} $content_data
+     * @return array
+     */
+    public function convertImageContentToArr(array $content_data): array
+    {
+        if ($content_data["image_url"]) {
+            $url = $content_data["image_url"];
+        } else {
+            $url = "data:{$content_data["image_type"]};base64,{$content_data["data"]}";
+        }
+
+        return ["type" => "image_url", "image_url" => ["url" => $url]];
+    }
+
+    /**
+     * @param array{tool_type: string, tool_call_id: string, tool_name: string, tool_args: array} $content_data
+     * @return array
+     */
+    public function convertToolCallingContentToArr(array $content_data): array
+    {
+        return [
+            "id" => $content_data["tool_call_id"],
+            "type" => $content_data["tool_type"],
+            "function" => [
+                "name" => $content_data["tool_name"],
+                "arguments" => $content_data["tool_args"]
+            ]
+        ];
     }
 }
