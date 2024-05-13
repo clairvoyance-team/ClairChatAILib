@@ -13,6 +13,7 @@ use Clair\Ai\ChatAi\Prompt\ChatPromptValue;
 use Clair\Ai\ChatAi\Tool\ToolFunction;
 use Clair\Ai\ChatAi\Tool\ToolFunctionCall;
 use Clair\Ai\ChatAi\Tool\ToolType;
+use OpenAI;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
 
@@ -22,7 +23,7 @@ class OpenAIChatTest extends TestCase
     protected OpenAIChat $openAIChat;
     protected function setUp(): void
     {
-        $this->openAIChat = new OpenAIChat("random");
+        $this->openAIChat = new OpenAIChat(OpenAI::client("random"));
     }
 
     #[TestDox("システムメッセージをAPIリクエストのmessages配列に変換できる")]

@@ -29,12 +29,12 @@ class ChatMessageHistoryTest extends TestCase
 
         $test_arr = $chat_history->toArray();
         $this->assertInstanceOf(HumanMessage::class, $test_arr[0]);
-        $this->assertEquals(new TextContent("テスト"), $test_arr[0]->content);
+        $this->assertEquals(new TextContent("テスト"), $test_arr[0]->contents[0]);
 
         $this->assertInstanceOf(AIMessage::class, $test_arr[1]);
-        $this->assertEquals(new TextContent("AIだよ"), $test_arr[1]->content);
+        $this->assertEquals(new TextContent("AIだよ"), $test_arr[1]->contents[0]);
 
         $this->assertInstanceOf(HumanMessage::class, $test_arr[2]);
-        $this->assertEquals(new TextContent("ユーザだよ"), $test_arr[2]->content);
+        $this->assertEquals(new TextContent("ユーザだよ"), $test_arr[2]->contents[0]);
     }
 }
