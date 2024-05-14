@@ -8,7 +8,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionParameter;
 
-class ToolFunction implements Tool
+class ToolFunction extends Tool
 {
     public const ToolType = ToolType::Function;
 
@@ -43,6 +43,11 @@ class ToolFunction implements Tool
                 throw new InvalidFunctionException("インスタンスを渡さない場合はstatic関数である必要があります");
             }
         }
+    }
+
+    public function getType(): ToolType
+    {
+        return self::ToolType;
     }
 
 
@@ -211,11 +216,11 @@ class ToolFunction implements Tool
 
     /**
      * AIが生成した引数を元に、関数を実行する
-     * @param array<string, mixed> $argument AIが生成した引数
+     * @param array<string, mixed>|null $argument AIが生成した引数
      * @return mixed ToolFunctionに渡された関数によって異なる
      * @throws ReflectionException
      */
-    public function run(array $argument) :mixed
+    public function run(array|null $argument) :mixed
     {
         if (is_null($this->instance_or_class)) throw new MissingExecutorException("関数を実行するインスタンスもしくはクラスが登録されていません");
 
@@ -242,5 +247,10 @@ class ToolFunction implements Tool
         }
 
         return $result;
+    }
+
+    public function getToolCallInstance(array|null $input_arguments): ToolFunctionCall
+    {
+        return new ToolFunctionCall($this->name, $input_arguments, $this);
     }
 }

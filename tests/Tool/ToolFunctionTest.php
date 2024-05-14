@@ -131,6 +131,23 @@ class ToolFunctionTest extends TestCase
 
     /**
      * @throws ReflectionException
+     * @throws InvalidFunctionException
+     */
+    #[TestDox("引数なし関数を読み込み・実行できる")]
+    public function test_functionWithoutArgs()
+    {
+        //・必須でない引数はなしでも良い
+
+        $tool_function = ToolFunction::readMethod("tests\Tool\AIToolDefinedClass", "noArgs");
+        $result = $tool_function->run(null);
+
+        $expected = "calling without Args";
+
+        $this->assertSame($expected, $result);
+    }
+
+    /**
+     * @throws ReflectionException
      */
     #[TestDox("JSON配列に変換できる")]
     public function test_canConvertToJson() {
@@ -245,5 +262,10 @@ class AIToolDefinedClass {
     public static function testStaticFunc($param, string $str=null, $str2=null) :string
     {
         return "$param::$str::$str2";
+    }
+
+    public static function noArgs() :string
+    {
+        return "calling without Args";
     }
 }

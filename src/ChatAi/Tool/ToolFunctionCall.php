@@ -9,24 +9,23 @@ class ToolFunctionCall implements ToolCall
 
     /**
      * @param string $name
-     * @param array<string, mixed> $args <引数名, 値>
+     * @param ?array<string, mixed> $input_arguments <引数名, 値>
      * @param ToolFunction $function
      */
     public function __construct(
-        public readonly string $name,
-        public readonly array $args,
+        public readonly string       $name,
+        public readonly ?array        $input_arguments,
         public readonly ToolFunction $function
     ) {
     }
 
     /**
-     * @param array<string, mixed> $input_arguments AIが生成した引数
      * @return mixed
      * @throws ReflectionException
      */
-    public function run(array $input_arguments): mixed
+    public function run(): mixed
     {
-        return $this->function->run($input_arguments);
+        return $this->function->run($this->input_arguments);
     }
 
     /**
@@ -34,13 +33,13 @@ class ToolFunctionCall implements ToolCall
      */
     public function toJsonArr(): array
     {
-        return ["name" => $this->name, "args" => $this->args];
+        return ["name" => $this->name, "args" => $this->input_arguments];
     }
 
     public function logFormat(): string
     {
         $args_str_arr = [];
-        foreach ($this->args as $arg_name => $arg_value) {
+        foreach ($this->input_arguments as $arg_name => $arg_value) {
             $args_str_arr[] = "{$arg_name}={$arg_value}";
         }
 

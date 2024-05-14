@@ -23,10 +23,10 @@ class OpenAIChat implements ChatLLM
 
 
     /**
+     * @param OpenAIChatCompletionParameters $params
      * @param ChatPromptValue $prompt
      * @param Tool[]|null $tools
      * @return LLMResult
-     * @throws InvalidParameterException
      */
     public function chatCompletion(OpenAIChatCompletionParameters $params, ChatPromptValue $prompt, array $tools=null): LLMResult
     {
@@ -38,8 +38,7 @@ class OpenAIChat implements ChatLLM
         }
 
         $response = $this->client->chat()->create($request_arr);
-
-        return new OpenAIResult();
+        return new OpenAIResult($response, $tools);
     }
 
     /**
