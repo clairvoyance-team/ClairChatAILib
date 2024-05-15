@@ -135,20 +135,20 @@ $response_text = $response->getContents();
 # Message
 役割ごとにMessageクラスが分かれています。Messageは複数のContentを持つ場合があります。
 
-- `SystemMessage`
-AIに前提条件や役割の説明・指示を行うメッセージ。Messageリストの最初に入れること
+- `SystemMessage`<br>
+AIに前提条件や役割の説明・指示を行うメッセージ。Messageリストの最初に入れること<br>
 ↳ 1つのTextContentを持つ
     
 - `HumanMessage`
- ユーザのメッセージ
+ ユーザのメッセージ<br>
  ↳ 複数のTextContent/複数のImageContentを持てる
  
 - `AIMessage`
-AIのメッセージ
+AIのメッセージ<br>
  ↳ 複数のTextContent/複数のToolCallingContent(ツール呼び出し)を持てる
 
 - `ToolMessage`
-ツールの実行結果メッセージ
+ツールの実行結果メッセージ<br>
 ↳ 1つのTextContentとtool_call_id(ツール呼び出しのid)を持つ。ツール呼び出しに対してツールの結果を送るメッセージ
 
 
