@@ -167,7 +167,7 @@ class OpenAIChatCompletion implements ChatLLM
      * @param ToolMessage $message
      * @return array
      */
-    private function convertToolMessageToArr(ToolMessage $message): array
+    public function convertToolMessageToArr(ToolMessage $message): array
     {
         $text = $message->contents->convertAPIRequest($this)["text"];
         $arr = ["role" => "tool", "content" => $text, "tool_call_id" => $message->tool_call_id];

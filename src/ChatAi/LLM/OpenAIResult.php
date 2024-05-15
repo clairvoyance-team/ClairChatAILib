@@ -2,8 +2,6 @@
 
 namespace Clair\Ai\ChatAi\LLM;
 
-use Clair\Ai\ChatAi\Message\AIMessage;
-use Clair\Ai\ChatAi\Message\Message;
 use Clair\Ai\ChatAi\Tool\Tool;
 use DateTime;
 use OpenAI\Responses\Chat\CreateResponse;

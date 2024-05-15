@@ -44,4 +44,19 @@ class ChatPromptValue
         return new ChatMessageHistory($history_messages);
     }
 
+    /**
+     * @return SystemMessage
+     */
+    public function getSystemMessage(): ?SystemMessage
+    {
+        foreach ($this->messages as $message) {
+            //システムメッセージはチャット履歴に含めない
+            if ($message instanceof SystemMessage) {
+                return $message;
+            }
+        }
+
+        //SystemMessageは含まれてない
+        return null;
+    }
 }

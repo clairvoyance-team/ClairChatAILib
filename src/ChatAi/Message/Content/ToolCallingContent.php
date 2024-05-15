@@ -24,7 +24,7 @@ class ToolCallingContent implements Content
             "tool_type" => $this->tool_type->value,
             "tool_call_id" => $this->tool_call_id,
             "tool_name" => $function["name"],
-            "tool_args" => $function["args"]
+            "tool_args" => json_encode($function["args"])
         ]);
     }
 

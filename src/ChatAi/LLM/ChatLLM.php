@@ -5,8 +5,8 @@ namespace Clair\Ai\ChatAi\LLM;
 use Clair\Ai\ChatAi\Message\AIMessage;
 use Clair\Ai\ChatAi\Message\HumanMessage;
 use Clair\Ai\ChatAi\Message\SystemMessage;
+use Clair\Ai\ChatAi\Message\ToolMessage;
 use Clair\Ai\ChatAi\Prompt\ChatPromptValue;
-use Clair\Ai\ChatAi\Tool\Tool;
 
 interface ChatLLM
 {
@@ -17,6 +17,13 @@ interface ChatLLM
      * @return LLMResult
      */
     public function generate(array $params, ChatPromptValue $prompt, array $tools=null): LLMResult;
+
+    /**
+     * プロンプトをAPIで投げる形式に変換する
+     * @param ChatPromptValue $prompt
+     * @return array|array[]
+     */
+    public function convertChatPromptToArr(ChatPromptValue $prompt): array;
 
     /**
      * @param SystemMessage $message
@@ -36,6 +43,11 @@ interface ChatLLM
      */
     public function convertAIMessageToArr(AIMessage $message): array;
 
+    /**
+     * @param ToolMessage $message
+     * @return array
+     */
+    public function convertToolMessageToArr(ToolMessage $message): array;
 
     /**
      * @param array{text: string} $content_data

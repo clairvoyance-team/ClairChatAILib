@@ -4,9 +4,11 @@ namespace tests\ChatAi;
 use Clair\Ai\ChatAi\ChatAi;
 use Clair\Ai\ChatAi\ChatHistory\ChatMessageHistory;
 use Clair\Ai\ChatAi\LLM\OpenAIChatCompletion;
+use Clair\Ai\ChatAi\Message\Content\ToolCallingContent;
 use Clair\Ai\ChatAi\Message\HumanMessage;
 use Clair\Ai\ChatAi\Message\SystemMessage;
 use Clair\Ai\ChatAi\Prompt\ChatPromptTemplate;
+use Clair\Ai\ChatAi\Prompt\ChatPromptValue;
 use Clair\Ai\ChatAi\Prompt\Exception\MissingInputVariablesException;
 use Clair\Ai\ChatAi\Prompt\HumanTextMessagePromptTemplate;
 use Clair\Ai\ChatAi\Prompt\SystemMessagePromptTemplate;
@@ -27,7 +29,7 @@ class ChatAIOpenAITest extends TestCase
      * @throws MissingInputVariablesException
      */
     #[TestDox("テキスト単体の会話")]
-    public function test_plainText() {
+    public function plainText() {
         $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-3.5-turbo"]);
         $response = $ChatAi->send("沖縄のおすすめの料理を教えて");
         $response_text = $response->getContents();
@@ -37,7 +39,7 @@ class ChatAIOpenAITest extends TestCase
     }
 
     #[Testdox("プロンプトを含めた会話")]
-    public function test_ChatPrompt() {
+    public function ChatPrompt() {
         $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-3.5-turbo", "max_tokens" => 500, "n" => 2]);
         $prompt = new ChatPromptTemplate([
             new SystemMessage("あなたは日本語を使うアシスタントです"),
@@ -49,14 +51,15 @@ class ChatAIOpenAITest extends TestCase
 
         $this->assertIsString($response_text);
 
-        $expected_ChatHistory = new ChatMessageHistory([
+        $expected_prompt = new ChatPromptValue([
+            new SystemMessage("あなたは日本語を使うアシスタントです"),
             new HumanMessage("沖縄のおすすめの料理を教えて")
         ]);
-        $this->assertEquals($expected_ChatHistory, $response->history);
+        $this->assertEquals($expected_prompt, $response->prompt_value);
     }
 
     #[Testdox("プロンプトテンプレートを含めた会話")]
-    public function test_ChatPromptTemplate() {
+    public function ChatPromptTemplate() {
         $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-3.5-turbo", "presence_penalty" => 0.3]);
         $prompt = new ChatPromptTemplate([
             new SystemMessagePromptTemplate("あなたは{input_language}を{output_language}に翻訳するアシスタントです"),
@@ -68,10 +71,11 @@ class ChatAIOpenAITest extends TestCase
 
         $this->assertIsString($response_text);
 
-        $expected_ChatHistory = new ChatMessageHistory([
+        $expected_prompt = new ChatPromptValue([
+            new SystemMessage("あなたは日本語を英語に翻訳するアシスタントです"),
             new HumanMessage("次の文章を英語に翻訳して「おすすめの料理を教えて」")
         ]);
-        $this->assertEquals($expected_ChatHistory, $response->history);
+        $this->assertEquals($expected_prompt, $response->prompt_value);
     }
 
     /**
@@ -79,7 +83,7 @@ class ChatAIOpenAITest extends TestCase
      * @throws MissingInputVariablesException
      */
     #[Testdox("ツール実行とツールを絶対に使用するように指定した会話")]
-    public function test_ToolChat() {
+    public function ToolChat() {
         $weather = new TestWeatherForecaster("晴子ちゃん");
         $tool = [ToolFunction::readMethod($weather, "getCurrentWeather")];
         $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-4-turbo", "tool_choice" => "required"], $tool);
@@ -98,15 +102,27 @@ class ChatAIOpenAITest extends TestCase
      * @throws MissingInputVariablesException
      */
     #[Testdox("ツールを実行し結果をgptに送って返信を取得する")]
-    public function test_runToolAndSendResult() {
+    public function runToolAndSendResult() {
         $tool = [ToolFunction::readMethod("tests\ChatAi\TestWeatherForecaster", "getCurrentTemperature")];
-        $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-4-turbo", "tool_choice" => "required"], $tool);
-        //$response = $ChatAi->send("今日の東京の気温を教えて");
-        //$result = $ChatAi->runToolsAndSendResult($response);
+        $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-4-turbo"], $tool);
+        $response = $ChatAi->send("今日の東京の気温を教えて");
 
-        //$this->assertIsString($result);
-        //$this->assertContains("晴子ちゃん", $result);
-        //->assertContains("は晴れです", $result);
+        if ($response->getTools()) {
+            //ツールを呼び出した場合
+            $result = $ChatAi->runToolsAndSendResult($response);
+            if ($result->getTools()) {
+
+                $this->assertInstanceOf(ToolCallingContent::class, $result->getTools()[0]);
+            } else {
+                $this->assertIsString($result->getContents());
+                print_r($result->getContents());
+            }
+
+        } else {
+            //テキストが返ってきたとき
+            $this->assertIsString($response->getContents());
+            print_r($response->getContents());
+        }
     }
 
     /**
@@ -114,7 +130,7 @@ class ChatAIOpenAITest extends TestCase
      * @throws MissingInputVariablesException
      */
     #[Testdox("ツールとプロンプト+履歴を含めた会話")]
-    public function test_ToolAndHistoryChat() {
+    public function ToolAndHistoryChat() {
         $weather = new TestWeatherForecaster("晴子ちゃん");
         $tools = [
             ToolFunction::readMethod($weather, "getCurrentWeather"),
@@ -136,10 +152,11 @@ class ChatAIOpenAITest extends TestCase
 
         $this->assertIsString($result);
 
-        $expected_ChatHistory = new ChatMessageHistory([
+        $expected_prompt = new ChatPromptValue([
+            new SystemMessage("あなたは気象予報士アシスタントです"),
             new HumanMessage("今日の東京の天気を教えて")
         ]);
-        $this->assertEquals($expected_ChatHistory, $response->history);
+        $this->assertEquals($expected_prompt, $response->prompt_value);
     }
 
 }

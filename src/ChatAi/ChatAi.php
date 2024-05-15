@@ -48,24 +48,43 @@ class ChatAi
         return new ChatAiResult(
             $response->getModelName(),
             $response->getChoices(),
-            $prompt_value->getChatMessageHistory(),
+            $prompt_value,
             $response->getCreatedAt(),
             $usage["input_tokens"],
             $usage["output_tokens"]
         );
     }
 
-//    public function runToolsAndSendResult(ChatAiResult $result) {
-//        if (is_null($result->getTools())) {
-//            return $result->getContents();
-//        }
-//
-//        $tools_result = $result->runTools();
-//        $tool_messages = [];
-//        foreach ($tools_result as $tool) {
-//            $tool_messages[] = new ToolMessage($tool["result"], $tool["tool_call_id"]);
-//        }
-//
-//
-//    }
+    /**
+     * ツールを実行し、実行結果をLLMに渡した上での生成結果を返す
+     * @throws MissingInputVariablesException
+     * @throws InvalidArgumentException
+     */
+    public function runToolsAndSendResult(ChatAiResult $result): ChatAiResult
+    {
+        if (is_null($result->getTools())) throw new InvalidArgumentException("ツール呼び出しがありません");
+
+        $tools_result = $result->runTools();
+        $tool_messages = [];
+        foreach ($tools_result as $tool) {
+            $tool_messages[] = new ToolMessage($tool["result"], $tool["tool_call_id"]);
+        }
+
+        $prompt_template = new ChatPromptTemplate(array_merge($result->getSentMessages(), [$result->getChoiceMessage(0)], $tool_messages));
+
+        $prompt_value = $prompt_template->formatPrompt();
+
+        $response = $this->chat_llm->generate($this->parameters, $prompt_value, $this->tools);
+
+        $usage = $response->getUsage();
+
+        return new ChatAiResult(
+            $response->getModelName(),
+            $response->getChoices(),
+            $prompt_value,
+            $response->getCreatedAt(),
+            $usage["input_tokens"],
+            $usage["output_tokens"]
+        );
+    }
 }

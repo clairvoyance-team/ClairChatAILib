@@ -170,7 +170,7 @@ class OpenAIChatTest extends TestCase
                         "type" => "function",
                         "function" => [
                             "name" => "get_current_weather",
-                            "arguments" => ["location" => "Tokyo"]
+                            "arguments" => '{"location":"Tokyo"}'
                         ]
                     ],
                     [
@@ -178,7 +178,7 @@ class OpenAIChatTest extends TestCase
                         "type" => "function",
                         "function" => [
                             "name" => "get_current_temperature",
-                            "arguments" => ["location" => "Tokyo"]
+                            "arguments" => '{"location":"Tokyo"}'
                         ]
                     ]
                 ]
@@ -215,7 +215,7 @@ class OpenAIChatTest extends TestCase
                         "type" => "function",
                         "function" => [
                             "name" => "get_current_weather",
-                            "arguments" => ["location" => "Tokyo"]
+                            "arguments" => '{"location":"Tokyo"}'
                         ]
                     ]
                 ]
