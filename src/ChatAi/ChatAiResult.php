@@ -1,12 +1,10 @@
 <?php
 namespace Clair\Ai\ChatAi;
 
-use Clair\Ai\ChatAi\ChatHistory\ChatHistory;
 use Clair\Ai\ChatAi\LLM\LLMResultChoice;
 use Clair\Ai\ChatAi\Message\AIMessage;
 use Clair\Ai\ChatAi\Message\Content\ToolCallingContent;
 use Clair\Ai\ChatAi\Message\Message;
-use Clair\Ai\ChatAi\Message\SystemMessage;
 use Clair\Ai\ChatAi\Prompt\ChatPromptValue;
 use DateTime;
 
