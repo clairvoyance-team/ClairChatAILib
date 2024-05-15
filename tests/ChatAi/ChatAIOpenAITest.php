@@ -171,15 +171,21 @@ class TestWeatherForecaster {
     /**
      * 現在の天気を取得する
      * @param string $location 日本語の文字列で場所を示す
+     * @param string $unit
      * @return string
      */
-    public function getCurrentWeather(string $location) :string
+    public function getCurrentWeather(string $location, string $unit) :string
     {
         $str = $this->name . ":" . $location . "は晴れです";
         echo $str;
         return $str;
     }
 
+    /**
+     * @param string $location
+     * @param string $format
+     * @return string
+     */
     public static function getCurrentTemperature(string $location, string $format="celsius"): string
     {
         $str = $location . "::24度";

@@ -64,8 +64,17 @@ class ChatAiResult
         return $this->prompt_value->messages;
     }
 
-    public function getChoiceMessage(int $index) :AIMessage
+    public function getChoiceMessage(int $index) :?AIMessage
     {
-        return $this->choices[$index]->message;
+        if (isset($this->choices[$index])) {
+            return $this->choices[$index]->message;
+        } else {
+            return null;
+        }
+    }
+
+    public function getAllChoiceMessages() :array
+    {
+        return array_map(fn($v) :AIMessage => $v->message, $this->choices);
     }
 }
