@@ -29,21 +29,6 @@ class ToolCallingContent implements Content
     }
 
     /**
-     * @return array{tool_call_id: string, type: string, tool_name: string, tool_args: array}
-     */
-    public function getContents(): array
-    {
-        $function = $this->tool_call->toJsonArr();
-        return [
-            "type"     => "tool",
-            "tool_type" => $this->tool_type->value,
-            "tool_call_id" => $this->tool_call_id,
-            "tool_name" => $function["name"],
-            "tool_args" => $function["args"]
-        ];
-    }
-
-    /**
      * ログ用に文字列で表すフォーマットを設定する
      * @return string
      */

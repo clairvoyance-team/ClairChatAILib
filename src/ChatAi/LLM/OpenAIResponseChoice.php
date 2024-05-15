@@ -16,7 +16,6 @@ class OpenAIResponseChoice
         public readonly Message $message,
         public readonly ?string $finish_reason
     ) {
-        print_r("index::" . $this->index);
     }
 
     /**

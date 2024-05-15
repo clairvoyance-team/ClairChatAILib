@@ -1,7 +1,7 @@
 <?php
 namespace tests\LLM;
 
-use Clair\Ai\ChatAi\LLM\OpenAIChat;
+use Clair\Ai\ChatAi\LLM\OpenAIChatCompletion;
 use Clair\Ai\ChatAi\Message\AIMessage;
 use Clair\Ai\ChatAi\Message\Content\ImageContent;
 use Clair\Ai\ChatAi\Message\Content\TextContent;
@@ -20,10 +20,10 @@ use PHPUnit\Framework\TestCase;
 class OpenAIChatTest extends TestCase
 {
 
-    protected OpenAIChat $openAIChat;
+    protected OpenAIChatCompletion $openAIChat;
     protected function setUp(): void
     {
-        $this->openAIChat = new OpenAIChat(OpenAI::client("random"));
+        $this->openAIChat = new OpenAIChatCompletion(OpenAI::client("random"));
     }
 
     #[TestDox("システムメッセージをAPIリクエストのmessages配列に変換できる")]

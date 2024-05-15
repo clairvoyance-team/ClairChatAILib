@@ -9,13 +9,6 @@ use Clair\Ai\ChatAi\LLM\ChatLLM;
  */
 interface Content
 {
-
-    /**
-     * 閲覧可能なデータを渡す
-     * @return array
-     */
-    public function getContents(): array;
-
     /**
      * @return array
      */

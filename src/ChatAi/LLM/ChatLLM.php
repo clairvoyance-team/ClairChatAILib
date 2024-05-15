@@ -11,6 +11,14 @@ use Clair\Ai\ChatAi\Tool\Tool;
 interface ChatLLM
 {
     /**
+     * @param array $params
+     * @param ChatPromptValue $prompt
+     * @param array|null $tools
+     * @return LLMResult
+     */
+    public function generate(array $params, ChatPromptValue $prompt, array $tools=null): LLMResult;
+
+    /**
      * @param SystemMessage $message
      * @return array
      */

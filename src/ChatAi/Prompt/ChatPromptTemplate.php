@@ -55,7 +55,8 @@ class ChatPromptTemplate
      * ほぼデバッグ用
      * @return (BaseMessagePromptTemplate|Message)[]
      */
-    public function getPromptMessages() {
+    public function getPromptMessages(): array
+    {
         return $this->messages;
     }
 
@@ -75,7 +76,7 @@ class ChatPromptTemplate
      * @throws MissingInputVariablesException
      * @return ChatPromptValue
      */
-    public function formatPrompt(array $arguments): ChatPromptValue
+    public function formatPrompt(array $arguments=[]): ChatPromptValue
     {
         $format_messages = [];
         foreach ($this->messages as $message) {

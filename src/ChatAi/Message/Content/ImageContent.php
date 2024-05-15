@@ -29,19 +29,6 @@ class ImageContent implements Content
         ]);
     }
 
-    /**
-     * @return array{image_url: string, data: string, image_type: string}
-     */
-    public function getContents(): array
-    {
-        return [
-            "type" => "image",
-            "image_url" => $this->image_url,
-            "data" => $this->data,
-            "image_type" => $this->image_type
-        ];
-    }
-
 
     /**
      * ログ用に文字列で表すフォーマットを設定する

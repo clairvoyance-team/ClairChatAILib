@@ -51,5 +51,18 @@ class MessagePromptTest extends TestCase
         $message_template->formatMessages($input_variables);
     }
 
+    /**
+     * @throws MissingInputVariablesException
+     */
+    #[TestDox("テンプレート変数がなくてもOK")]
+    public function test_isNothingVariable() {
+        $template = "あなたは英語を日本語に翻訳するアシスタントです。";
+        $message_template = new SystemMessagePromptTemplate($template);
+
+        $input_variables = ["input_language", "output"];
+        $test_result = $message_template->formatMessages($input_variables);
+        $expected_obj[] = new SystemMessage("あなたは英語を日本語に翻訳するアシスタントです。");
+        $this->assertEquals($expected_obj, $test_result);
+    }
 }
 

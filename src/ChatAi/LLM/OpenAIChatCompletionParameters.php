@@ -6,9 +6,9 @@ use Clair\Ai\ChatAi\LLM\Exception\InvalidParameterException;
 
 class OpenAIChatCompletionParameters implements Parameters
 {
-    public readonly string $model_name;
+    public readonly string $model;
 
-    public readonly ?int $frequency_penalty;
+    public readonly ?float $frequency_penalty;
 
     public readonly ?array $logit_bias;
 
@@ -20,7 +20,7 @@ class OpenAIChatCompletionParameters implements Parameters
 
     public readonly ?int $n;
 
-    public readonly ?int $presence_penalty;
+    public readonly ?float $presence_penalty;
 
     public readonly ?array $response_format;
 
@@ -28,9 +28,9 @@ class OpenAIChatCompletionParameters implements Parameters
 
     public readonly null|string|array $stop;
 
-    public readonly ?int $temprature;
+    public readonly ?float $temprature;
 
-    public readonly ?int $top_p;
+    public readonly ?float $top_p;
 
     public readonly null|string|array $tool_choice;
 
@@ -42,7 +42,7 @@ class OpenAIChatCompletionParameters implements Parameters
      */
     public function __construct(array $params)
     {
-        if (!isset($params["model_name"])) throw new InvalidParameterException("モデル名は必須です");
+        if (!isset($params["model"])) throw new InvalidParameterException("モデル名は必須です");
 
         //キー名がパラメータ名
         foreach ($params as $key => $value) {
@@ -59,10 +59,15 @@ class OpenAIChatCompletionParameters implements Parameters
     {
         $request = [];
         foreach ($this as $property_name => $value) {
-            if ($property_name == "model_name") continue;
+            if ($property_name == "model") continue;
             $request[$property_name] = $value;
         }
 
         return $request;
+    }
+
+    public function getModel(): string
+    {
+        return $this->model;
     }
 }

@@ -48,4 +48,18 @@ class HumanMessage implements Message
     {
         return $this->type;
     }
+
+    /**
+     * @return string|null
+     */
+    public function getTextContents(): string|null
+    {
+        foreach ($this->contents as $content) {
+            if ($content instanceof TextContent) {
+                return $content->getContents();
+            }
+        }
+
+        return null;
+    }
 }

@@ -14,7 +14,7 @@ class ToolFunctionCall implements ToolCall
      */
     public function __construct(
         public readonly string       $name,
-        public readonly ?array        $input_arguments,
+        public readonly ?array       $input_arguments,
         public readonly ToolFunction $function
     ) {
     }

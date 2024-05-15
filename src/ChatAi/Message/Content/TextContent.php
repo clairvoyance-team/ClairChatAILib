@@ -16,15 +16,9 @@ class TextContent implements Content
         return $llm->convertTextContentToArr(["text" => $this->content]);
     }
 
-    /**
-     * @return array{text: string}
-     */
-    public function getContents(): array
+    public function getContents(): string
     {
-        return [
-            "type" => "text",
-            "text" => $this->content
-        ];
+        return $this->content;
     }
 
     /**

@@ -13,30 +13,40 @@ use Clair\Ai\ChatAi\Prompt\ChatPromptValue;
 
 use Clair\Ai\ChatAi\Tool\Tool;
 use OpenAI;
+use OpenAI\Client;
 
-class OpenAIChat implements ChatLLM
+class OpenAIChatCompletion implements ChatLLM
 {
 
     public function __construct(
-        private readonly OpenAI\Client $client,
+        private readonly Client $client,
     ) {}
+
+    public static function from(string $api_key) :self
+    {
+        return new self(OpenAI::client($api_key));
+    }
 
 
     /**
-     * @param OpenAIChatCompletionParameters $params
+     * ユーザは主にこの関数を使う
+     * @param array $params
      * @param ChatPromptValue $prompt
      * @param Tool[]|null $tools
      * @return LLMResult
      */
-    public function chatCompletion(OpenAIChatCompletionParameters $params, ChatPromptValue $prompt, array $tools=null): LLMResult
+    public function generate(array $params, ChatPromptValue $prompt, array $tools=null): LLMResult
     {
+        $params = new OpenAIChatCompletionParameters($params);
+
         $request_arr = $params->toRequestArr();
-        $request_arr["model"] = $params->model_name;
+        $request_arr["model"] = $params->model;
         $request_arr["messages"] = $this->convertChatPromptToArr($prompt);
         if (!is_null($tools)) {
             $request_arr["tools"] = array_map(fn($tool) => $tool->toRequestArr(), $tools);
         }
 
+        print_r($request_arr);
         $response = $this->client->chat()->create($request_arr);
         return new OpenAIResult($response, $tools);
     }
