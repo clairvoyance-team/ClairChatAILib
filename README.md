@@ -32,7 +32,6 @@ class TestWeatherForecaster {
     public function getCurrentWeather(string $location) :string
     {
         $str = $this->name . ":" . $location . "は晴れです";
-        echo $str;
         return $str;
     }
 }
@@ -41,8 +40,8 @@ class TestWeatherForecaster {
 ツールをAIに渡して実行する
 ```php
 $weather = new TestWeatherForecaster("晴子ちゃん");
-$tool = [ToolFunction::readMethod($weather, "getCurrentWeather")];
-$ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-4-turbo", "tool_choice" => "required"], $tool);
+$tools = [ToolFunction::readMethod($weather, "getCurrentWeather")];
+$ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-4-turbo", "tool_choice" => "required"], $tools);
 $response = $ChatAi->send("今日の東京の天気を教えて");
 $result = $response->runTools(); //getCurrentWeatherの実行結果が入る
 ```
