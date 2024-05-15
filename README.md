@@ -119,6 +119,7 @@ $chat_history->addUserMessage("Userです");
 //上記のHistoryは以下と同じ意味になります
 //$chat_history = new ChatMessageHistory([new AIMessage("AIです"), new HumanMessage("Userです")]);
 
+//ChatPromptTemplateの最後にChatHistoryのMessageを追加します
 $prompt->appendChatHistory($chat_history);
 
 //プロンプトとテンプレート変数を代入する　この時テンプレート変数は全て代入しなくてはいけない！
