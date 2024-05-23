@@ -115,16 +115,16 @@ class ToolFunctionTest extends TestCase
     public function test_canRunStaticFunction()
     {
         //・必須でない引数はなしでも良い
+        //渡される引数の順序は関係なく実行できる
 
         $tool_function = ToolFunction::readMethod("tests\Tool\AIToolDefinedClass", "testStaticFunc");
         $args = [
-            "param" => 1000,
-            "str" => "文字列です",
-            "str2" => "文字列です222"
+            "str2" => "文字列です222",
+            "param" => 1000
         ];
         $result = $tool_function->run($args);
 
-        $expected = "1000::文字列です::文字列です222";
+        $expected = "1000::::文字列です222";
 
         $this->assertSame($expected, $result);
     }

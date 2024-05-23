@@ -224,26 +224,17 @@ class ToolFunction extends Tool
     {
         if (is_null($this->instance_or_class)) throw new MissingExecutorException("関数を実行するインスタンスもしくはクラスが登録されていません");
 
-        $reflector = new ReflectionClass($this->instance_or_class);
-        $parameters = $reflector->getMethod($this->name)->getParameters();
-        $parameter_name_arr = array_map(fn($value) :string => $value->getName(), $parameters);
-
-        //一応実際の関数実装の引数順に並び替えて格納
-        $func_argument = [];
-        foreach ($parameter_name_arr as $parameter_name) {
-            if (isset($argument[$parameter_name])) {
-                $func_argument[] = $argument[$parameter_name];
-            }
-        }
+        //nullの場合は空配列にする
+        $argument ??= [];
 
         if (is_string($this->instance_or_class)) {
             //staticメソッド
             $class_name = $this->instance_or_class;
-            $result = call_user_func_array([$class_name, $this->name], $func_argument);
+            $result = call_user_func_array([$class_name, $this->name], $argument);
         } else {
             //インスタンスからのメソッド
             $instance = $this->instance_or_class;
-            $result = $instance->{$this->name}(...$func_argument);
+            $result = $instance->{$this->name}(...$argument);
         }
 
         return $result;
