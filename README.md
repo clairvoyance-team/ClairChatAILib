@@ -2,6 +2,21 @@
 
 Chatやツールの実行を簡単に行うためのライブラリです。
 
+# Composerでの導入方法
+PHPのあるコンテナorサーバ でcomposer.jsonのあるディレクトリに移動して下さい<br>
+```shell
+composer config repositories.clairvoyance/chat-ai-lib vcs https://github.com/clairvoyance-team/ClairChatAILib
+```
+```shell
+composer require clairvoyance/chat-ai-lib:{バージョン}
+```
+
+ここでGithubのトークンを生成しろと言われます。親切にURLを出してくれてると思うので、ブラウザで開いてトークンを生成してください。その後、そのトークンをコマンドに打ちます。<br>
+`Token (hidden):`
+
+成功すると
+`Token stored successfully.` でインストールが始まります
+
 # Get Started
 
 ### 単一テキストを送る
