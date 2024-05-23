@@ -286,7 +286,7 @@ $expected = new ToolFunction(
 
 ## インスタンスor staticメソッドで定義
 この場合、定義されたメソッド名・引数名がそのままToolFunctionになります。PHPDocでメソッド・引数の説明をAIに渡すことができます。またデフォルト値の有無で引数が必須かどうか決まります。
-引数の型は src/ChatAi/Tool/JsonTypeEnum.php に書いてある引数のみが対応可です。
+引数の型は int|string|array|float|bool のみが対応可です。
 
 該当クラス
 ```php

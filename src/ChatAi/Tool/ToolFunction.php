@@ -159,7 +159,7 @@ class ToolFunction extends Tool
 
             $type = ($method_param->hasType()) ? $method_param->getType() : ($doc_parameter["type"] ?? "");
             //認識可能な型
-            $allow_type = "/int|string|array|float|bool|object/";
+            $allow_type = "/int|string|array|float|bool/";
             $type = (preg_match($allow_type, $type, $match)) ? $match[0] : null;
             $json_type = ($type) ? JSONTypeEnum::from($type) : JSONTypeEnum::String;
 
