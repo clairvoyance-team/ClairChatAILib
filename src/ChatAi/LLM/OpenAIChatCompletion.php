@@ -46,7 +46,6 @@ class OpenAIChatCompletion implements ChatLLM
             $request_arr["tools"] = array_map(fn($tool) => $tool->toRequestArr(), $tools);
         }
 
-        print_r($request_arr);
         $response = $this->client->chat()->create($request_arr);
         return new OpenAIResult($response, $tools);
     }
