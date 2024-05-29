@@ -59,4 +59,10 @@ class ChatPromptValue
         //SystemMessageは含まれてない
         return null;
     }
+
+    public function logFormat() :string
+    {
+        $arr = array_map(fn($v) => $v->logFormat(), $this->messages);
+        return implode("\n", $arr);
+    }
 }

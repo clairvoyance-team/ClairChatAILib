@@ -42,7 +42,7 @@ class AIMessage implements Message
     public function logFormat(): string
     {
         $contents_format_arr = array_map(fn($val) :string => $val->formatLog(), $this->contents);
-        $content = implode("\n", $contents_format_arr);
+        $content = trim(implode("\n", $contents_format_arr));
 
         return "({$this->type}){$this->name}: {$content}\n";
     }

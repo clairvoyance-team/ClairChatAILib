@@ -86,5 +86,28 @@ class ChatPromptTemplateTest extends TestCase
         $this->assertEquals(new HumanMessage("Userです"), $messages[4]);
     }
 
+
+    #[TestDox("PromptValueからログフォーマットに変換できる")]
+    public function test_canConvertToLogFormat() {
+        $prompt_value = new ChatPromptValue([
+            new SystemMessage("あなたは 英語 を フランス語 に翻訳するアシスタントです。"),
+            new HumanMessage("以下の 英語 を翻訳してください。また200文字以内に収めてください。"),
+            new HumanMessage("I love cats.", "alice"),
+            new AIMessage("J'aime les chats.")
+        ]);
+
+        $result = $prompt_value->logFormat();
+        $expected = <<<EOL
+(system): あなたは 英語 を フランス語 に翻訳するアシスタントです。
+
+(human): 以下の 英語 を翻訳してください。また200文字以内に収めてください。
+
+(human)alice: I love cats.
+
+(ai): J'aime les chats.
+
+EOL;
+        $this->assertSame($expected, $result);
+    }
 }
 
