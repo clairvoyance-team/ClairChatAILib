@@ -36,6 +36,6 @@ class ImageContent implements Content
      */
     public function formatLog(): string
     {
-        return $this->image_url;
+        return $this->image_url ?? "image_data";
     }
 }
