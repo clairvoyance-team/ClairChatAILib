@@ -22,7 +22,7 @@ class ChatAIOpenAITest extends TestCase
     protected readonly OpenAIChatCompletion $open_ai_chat;
     public function setUp(): void
     {
-        $this->open_ai_chat = OpenAIChatCompletion::from("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");
+        $this->open_ai_chat = OpenAIChatCompletion::from("");
     }
 
     /**
