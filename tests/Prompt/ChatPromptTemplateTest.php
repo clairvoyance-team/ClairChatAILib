@@ -58,6 +58,77 @@ class ChatPromptTemplateTest extends TestCase
     }
 
     /**
+     * @throws MissingInputVariablesException
+     */
+    #[TestDox("入力値にテンプレート変数があり、入れ子になってても全てに代入できる1")]
+    public function test_nestedVariables1() {
+        $input = [
+            "second_language" => "イタリア語or{input_language}",
+            "input_language" => "英語",
+            "output" => "フランス語と{third_language}と{second_language}",
+            "num" => 200,
+            "third_language" => "中国語"
+        ];
+        $result = $this->chatPrompt->formatPrompt($input);
+
+        $expected_obj = new ChatPromptValue([
+            new SystemMessage("あなたは 英語 を フランス語と中国語とイタリア語or英語 に翻訳するアシスタントです。"),
+            new HumanMessage("以下の 英語 を翻訳してください。また200文字以内に収めてください。"),
+            new HumanMessage("I love cats.", "alice")
+        ]);
+
+        $this->assertInstanceOf(ChatPromptValue::class, $result);
+        $this->assertEquals($expected_obj, $result);
+    }
+
+    /**
+     * @throws MissingInputVariablesException
+     */
+    #[TestDox("入力値にテンプレート変数があり、入れ子になってても全てに代入できる　ネスト変数を入力値後半に")]
+    public function test_nestedVariables2() {
+        $input = [
+            "input_language" => "英語もしくは{second_language}",
+            "output" => "フランス語と{third_language}と{second_language}",
+            "num" => 200,
+            "second_language" => "イタリア語",
+            "third_language" => "中国語"
+        ];
+        $result = $this->chatPrompt->formatPrompt($input);
+
+        $expected_obj = new ChatPromptValue([
+            new SystemMessage("あなたは 英語もしくはイタリア語 を フランス語と中国語とイタリア語 に翻訳するアシスタントです。"),
+            new HumanMessage("以下の 英語もしくはイタリア語 を翻訳してください。また200文字以内に収めてください。"),
+            new HumanMessage("I love cats.", "alice")
+        ]);
+
+        $this->assertInstanceOf(ChatPromptValue::class, $result);
+        $this->assertEquals($expected_obj, $result);
+    }
+
+    /**
+     * @throws MissingInputVariablesException
+     */
+    #[TestDox("入れ子が解決しない場合は、1階層分だけ処理される")]
+    public function test_nestedVariables3() {
+        $input = [
+            "input_language" => "英語もしくは{input_language}",
+            "output" => "フランス語と{third_language}",
+            "num" => 200,
+            "third_language" => "中国語"
+        ];
+        $result = $this->chatPrompt->formatPrompt($input);
+
+        $expected_obj = new ChatPromptValue([
+            new SystemMessage("あなたは 英語もしくは{input_language} を フランス語と中国語 に翻訳するアシスタントです。"),
+            new HumanMessage("以下の 英語もしくは{input_language} を翻訳してください。また200文字以内に収めてください。"),
+            new HumanMessage("I love cats.", "alice")
+        ]);
+
+        $this->assertInstanceOf(ChatPromptValue::class, $result);
+        $this->assertEquals($expected_obj, $result);
+    }
+
+    /**
      * @testdox テンプレート変数に対して入力値が足りなければエラーが出る
      * @throws MissingInputVariablesException
      */
@@ -65,6 +136,17 @@ class ChatPromptTemplateTest extends TestCase
     public function test_throwIfArgumentMissing() {
         $this->expectException(MissingInputVariablesException::class);
         $input = ["input_language" => "英語", "num" => 200];
+        $this->chatPrompt->formatPrompt($input);
+    }
+
+    /**
+     * @testdox テンプレート変数に対して入力値が足りなければエラーが出る
+     * @throws MissingInputVariablesException
+     */
+    #[TestDox("テンプレート変数内で入れ子になっている変数に対しても、入力値が足りなければエラーが出る")]
+    public function test_throwIfArgumentInNestedMissing() {
+        $this->expectException(MissingInputVariablesException::class);
+        $input = ["input_language" => "英語もしくは{output}", "output" => "フランス語と{second_language}", "num" => 200];
         $this->chatPrompt->formatPrompt($input);
     }
 

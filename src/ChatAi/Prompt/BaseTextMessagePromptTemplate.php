@@ -12,7 +12,7 @@ abstract class BaseTextMessagePromptTemplate extends BaseMessagePromptTemplate
     /**
      * @var string[] $input_variables テンプレート引数
      */
-    public readonly array $input_variables;
+    public array $input_variables;
 
     /**
      * メモ用名前
@@ -47,11 +47,22 @@ abstract class BaseTextMessagePromptTemplate extends BaseMessagePromptTemplate
      */
     protected function assign(array $arguments = []): string
     {
+        //入力値に含まれるテンプレート変数も取得
+        foreach ($arguments as $argument) {
+            $nested_input_variables = $this->getTemplateVariables($argument);
+            $this->input_variables = array_unique(array_merge($this->input_variables, $nested_input_variables));
+        }
+
         $assign_result = $this->template;
         foreach ($this->input_variables as $variable) {
             if (!array_key_exists($variable, $arguments)) throw new MissingInputVariablesException();
 
             $assign_result = preg_replace("/{{$variable}}/", $arguments[$variable], $assign_result);
+
+            //入力値に含まれているテンプレート変数にも代入する
+            foreach ($arguments as $key => $val) {
+                $arguments[$key] = preg_replace("/{{$variable}}/", $arguments[$variable], $val);
+            }
         }
 
         return $assign_result;

@@ -360,3 +360,11 @@ prompt_value = new ChatPromptValue([
 ]);
 $result = $this->openAIChat->convertChatPromptToArr($prompt_value, $tools);
 ```
+
+# 開発tips
+以下でテストができる
+```shell
+vendor/bin/phpunit --testdox
+```
+
+ブラウザ等はないので、基本的にテストコードで開発していく
