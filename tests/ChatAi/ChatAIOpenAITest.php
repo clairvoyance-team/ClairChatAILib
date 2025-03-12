@@ -159,6 +159,55 @@ class ChatAIOpenAITest extends TestCase
         $this->assertEquals($expected_prompt, $response->prompt_value);
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws MissingInputVariablesException
+     */
+    #[Testdox("JsonSchemaを使ったレスポンス")]
+    public function test_JsonSchemaResponse() {
+        $json_schema = [
+            'name' => 'check_non_japanese',
+            'strict' => true,
+            'schema' =>
+                [
+                    'type' => 'object',
+                    'required' =>
+                        [
+                            0 => 'un_japanese',
+                            1 => 'un_japanese_integer',
+                        ],
+                    'properties' =>
+                        [
+                            'un_japanese' =>
+                                [
+                                    'type' => 'boolean',
+                                    'description' => '理解できる日本語か判定してください。理解できればtrue、理解できなければfalseを返してください',
+                                ],
+                            'un_japanese_integer' =>
+                                [
+                                    'type' => 'integer',
+                                    'description' => '理解できる日本語か0から9の10段階で判定してください。理解できる場合は9、理解できない場合は0で返してください',
+                                ],
+                        ],
+                    'additionalProperties' => false,
+                ],
+        ];
+
+        $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-4o", "response_format" => ["type" => "json_schema", "json_schema" => $json_schema]]);
+        $prompt = new ChatPromptTemplate([
+            new SystemMessage("あなたはユーザーの日本語を厳しくチェックする先生です。"),
+            new HumanTextMessagePromptTemplate("えーっと。。恥ずかしいなぁwwみーちゃんがそんな事聞くなんて意外だよ？？angerschaft")
+        ]);
+        $response = $ChatAi->send($prompt);
+
+        $result = $response->getContents();
+
+        $json_array = json_decode($result, true);
+        $this->assertIsArray($json_array);
+        $this->assertFalse($json_array["un_japanese"]);
+        $this->assertIsInt($json_array["un_japanese_integer"]);
+    }
+
 }
 
 class TestWeatherForecaster {
