@@ -164,7 +164,7 @@ class ChatAIOpenAITest extends TestCase
      * @throws MissingInputVariablesException
      */
     #[Testdox("JsonSchemaを使ったレスポンス")]
-    public function test_JsonSchemaResponse() {
+    public function JsonSchemaResponse() {
         $json_schema = [
             'name' => 'check_non_japanese',
             'strict' => true,
