@@ -364,7 +364,7 @@ $result = $this->openAIChat->convertChatPromptToArr($prompt_value, $tools);
 # 開発tips
 以下でテストができる
 ```shell
-vendor/bin/phpunit --testdox
+./vendor/bin/phpunit --testdox tests
 ```
 
 ブラウザ等はないので、基本的にテストコードで開発していく

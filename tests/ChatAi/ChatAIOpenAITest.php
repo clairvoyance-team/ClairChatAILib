@@ -5,10 +5,12 @@ use Clair\Ai\ChatAi\ChatAi;
 use Clair\Ai\ChatAi\ChatHistory\ChatMessageHistory;
 use Clair\Ai\ChatAi\LLM\OpenAIChatCompletion;
 use Clair\Ai\ChatAi\Message\Content\ToolCallingContent;
+use Clair\Ai\ChatAi\Message\DeveloperMessage;
 use Clair\Ai\ChatAi\Message\HumanMessage;
 use Clair\Ai\ChatAi\Message\SystemMessage;
 use Clair\Ai\ChatAi\Prompt\ChatPromptTemplate;
 use Clair\Ai\ChatAi\Prompt\ChatPromptValue;
+use Clair\Ai\ChatAi\Prompt\DeveloperMessagePromptTemplate;
 use Clair\Ai\ChatAi\Prompt\Exception\MissingInputVariablesException;
 use Clair\Ai\ChatAi\Prompt\HumanTextMessagePromptTemplate;
 use Clair\Ai\ChatAi\Prompt\SystemMessagePromptTemplate;
@@ -43,6 +45,7 @@ class ChatAIOpenAITest extends TestCase
         $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-3.5-turbo", "max_tokens" => 500, "n" => 2]);
         $prompt = new ChatPromptTemplate([
             new SystemMessage("あなたは日本語を使うアシスタントです"),
+            new DeveloperMessage("返答は30文字以内でお願いします"),
             new HumanMessage("沖縄のおすすめの料理を教えて")
         ]);
         $response = $ChatAi->send($prompt);
@@ -53,6 +56,7 @@ class ChatAIOpenAITest extends TestCase
 
         $expected_prompt = new ChatPromptValue([
             new SystemMessage("あなたは日本語を使うアシスタントです"),
+            new DeveloperMessage("返答は30文字以内でお願いします"),
             new HumanMessage("沖縄のおすすめの料理を教えて")
         ]);
         $this->assertEquals($expected_prompt, $response->prompt_value);
@@ -63,6 +67,7 @@ class ChatAIOpenAITest extends TestCase
         $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-3.5-turbo", "presence_penalty" => 0.3]);
         $prompt = new ChatPromptTemplate([
             new SystemMessagePromptTemplate("あなたは{input_language}を{output_language}に翻訳するアシスタントです"),
+            new DeveloperMessagePromptTemplate("実際に存在する料理であること"),
             new HumanTextMessagePromptTemplate("次の文章を{output_language}に翻訳して「おすすめの料理を教えて」")
         ]);
         $response = $ChatAi->send($prompt, ["input_language" => "日本語", "output_language" => "英語"]);

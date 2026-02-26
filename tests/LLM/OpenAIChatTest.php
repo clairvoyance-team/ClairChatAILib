@@ -6,6 +6,7 @@ use Clair\Ai\ChatAi\Message\AIMessage;
 use Clair\Ai\ChatAi\Message\Content\ImageContent;
 use Clair\Ai\ChatAi\Message\Content\TextContent;
 use Clair\Ai\ChatAi\Message\Content\ToolCallingContent;
+use Clair\Ai\ChatAi\Message\DeveloperMessage;
 use Clair\Ai\ChatAi\Message\HumanMessage;
 use Clair\Ai\ChatAi\Message\SystemMessage;
 use Clair\Ai\ChatAi\Message\ToolMessage;
@@ -31,14 +32,20 @@ class OpenAIChatTest extends TestCase
     {
         $prompt_value = new ChatPromptValue([
             new SystemMessage("あなたは日本語を話すアドバイザーです。"),
+            new DeveloperMessage("あんまり変なこと言わないでね。"),
             new HumanMessage("こんにちは！")
         ]);
         $result = $this->openAIChat->convertChatPromptToArr($prompt_value);
+        fwrite(STDERR, print_r($result, true));
 
         $expected = [
             [
                 "role" => "system",
                 "content" => "あなたは日本語を話すアドバイザーです。"
+            ],
+            [
+                "role" => "developer",
+                "content" => "あんまり変なこと言わないでね。"
             ],
             [
                 "role" => "user",
@@ -230,3 +237,4 @@ class OpenAIChatTest extends TestCase
         $this->assertSame($expected, $result);
     }
 }
+
