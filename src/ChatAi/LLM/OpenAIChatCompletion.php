@@ -6,6 +6,7 @@ use Clair\Ai\ChatAi\LLM\Exception\InvalidParameterException;
 use Clair\Ai\ChatAi\Message\AIMessage;
 use Clair\Ai\ChatAi\Message\Content\TextContent;
 use Clair\Ai\ChatAi\Message\Content\ToolCallingContent;
+use Clair\Ai\ChatAi\Message\DeveloperMessage;
 use Clair\Ai\ChatAi\Message\HumanMessage;
 use Clair\Ai\ChatAi\Message\SystemMessage;
 use Clair\Ai\ChatAi\Message\ToolMessage;
@@ -63,6 +64,7 @@ class OpenAIChatCompletion implements ChatLLM
 
             $convert_message_arr = match ($message::class) {
                 SystemMessage::class => $this->convertSystemMessageToArr($message),
+                DeveloperMessage::class => $this->convertDeveloperMessageToArr($message),
                 HumanMessage::class  => $this->convertHumanMessageToArr($message),
                 AIMessage::class     => $this->convertAIMessageToArr($message),
                 ToolMessage::class   => $this->convertToolMessageToArr($message)
@@ -90,6 +92,24 @@ class OpenAIChatCompletion implements ChatLLM
         //messagesの中身として、配列でラップして返す
         return [$arr];
     }
+
+    /**
+     * DeveloperMessageをopenAIでリクエストする形式で返す
+     * @param DeveloperMessage $message
+     * @return array
+     */
+    public function convertDeveloperMessageToArr(DeveloperMessage $message): array
+    {
+        $text = $message->contents->convertAPIRequest($this)["text"];
+        $arr = ["role" => "developer", "content" => $text];
+        if (!is_null($message->name)) {
+            $arr["name"] = $message->name;
+        }
+
+        //messagesの中身として、配列でラップして返す
+        return [$arr];
+    }
+
 
     /**
      * HumanMessageをopenAIでリクエストする形式で返す

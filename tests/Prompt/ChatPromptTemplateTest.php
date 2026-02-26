@@ -3,10 +3,12 @@ namespace tests\Prompt;
 
 use Clair\Ai\ChatAi\ChatHistory\ChatMessageHistory;
 use Clair\Ai\ChatAi\Message\AIMessage;
+use Clair\Ai\ChatAi\Message\DeveloperMessage;
 use Clair\Ai\ChatAi\Message\HumanMessage;
 use Clair\Ai\ChatAi\Message\SystemMessage;
 use Clair\Ai\ChatAi\Prompt\ChatPromptTemplate;
 use Clair\Ai\ChatAi\Prompt\ChatPromptValue;
+use Clair\Ai\ChatAi\Prompt\DeveloperMessagePromptTemplate;
 use Clair\Ai\ChatAi\Prompt\HumanTextMessagePromptTemplate;
 use Clair\Ai\ChatAi\Prompt\SystemMessagePromptTemplate;
 use Clair\Ai\ChatAi\Prompt\Exception\MissingInputVariablesException;
@@ -25,12 +27,12 @@ class ChatPromptTemplateTest extends TestCase
         $template_system = "あなたは {input_language} を {output} に翻訳するアシスタントです。";
         $system_message_template = new SystemMessagePromptTemplate($template_system);
 
-        $template_human = "以下の {input_language} を翻訳してください。また{num}文字以内に収めてください。";
-        $human_message_template = new HumanTextMessagePromptTemplate($template_human);
+        $template_developper = "以下の {input_language} を翻訳してください。また{num}文字以内に収めてください。";
+        $developper_message_template = new DeveloperMessagePromptTemplate($template_developper);
 
         $human_message = new HumanMessage("I love cats.", "alice");
 
-        $this->chatPrompt = new ChatPromptTemplate([$system_message_template, $human_message_template, $human_message]);
+        $this->chatPrompt = new ChatPromptTemplate([$system_message_template, $developper_message_template, $human_message]);
     }
 
     #[TestDox("正しいテンプレート変数の取得")]
@@ -49,7 +51,7 @@ class ChatPromptTemplateTest extends TestCase
 
         $expected_obj = new ChatPromptValue([
             new SystemMessage("あなたは 英語 を フランス語 に翻訳するアシスタントです。"),
-            new HumanMessage("以下の 英語 を翻訳してください。また200文字以内に収めてください。"),
+            new DeveloperMessage("以下の 英語 を翻訳してください。また200文字以内に収めてください。"),
             new HumanMessage("I love cats.", "alice")
         ]);
 
@@ -73,7 +75,7 @@ class ChatPromptTemplateTest extends TestCase
 
         $expected_obj = new ChatPromptValue([
             new SystemMessage("あなたは 英語 を フランス語と中国語とイタリア語or英語 に翻訳するアシスタントです。"),
-            new HumanMessage("以下の 英語 を翻訳してください。また200文字以内に収めてください。"),
+            new DeveloperMessage("以下の 英語 を翻訳してください。また200文字以内に収めてください。"),
             new HumanMessage("I love cats.", "alice")
         ]);
 
@@ -97,7 +99,7 @@ class ChatPromptTemplateTest extends TestCase
 
         $expected_obj = new ChatPromptValue([
             new SystemMessage("あなたは 英語もしくはイタリア語 を フランス語と中国語とイタリア語 に翻訳するアシスタントです。"),
-            new HumanMessage("以下の 英語もしくはイタリア語 を翻訳してください。また200文字以内に収めてください。"),
+            new DeveloperMessage("以下の 英語もしくはイタリア語 を翻訳してください。また200文字以内に収めてください。"),
             new HumanMessage("I love cats.", "alice")
         ]);
 
@@ -120,7 +122,7 @@ class ChatPromptTemplateTest extends TestCase
 
         $expected_obj = new ChatPromptValue([
             new SystemMessage("あなたは 英語もしくは{input_language} を フランス語と中国語 に翻訳するアシスタントです。"),
-            new HumanMessage("以下の 英語もしくは{input_language} を翻訳してください。また200文字以内に収めてください。"),
+            new DeveloperMessage("以下の 英語もしくは{input_language} を翻訳してください。また200文字以内に収めてください。"),
             new HumanMessage("I love cats.", "alice")
         ]);
 
@@ -160,7 +162,7 @@ class ChatPromptTemplateTest extends TestCase
 
         $messages = $this->chatPrompt->getPromptMessages();
         $this->assertInstanceOf(SystemMessagePromptTemplate::class, $messages[0]);
-        $this->assertInstanceOf(HumanTextMessagePromptTemplate::class, $messages[1]);
+        $this->assertInstanceOf(DeveloperMessagePromptTemplate::class, $messages[1]);
         $this->assertInstanceOf(HumanMessage::class, $messages[2]);
         $this->assertInstanceOf(AIMessage::class, $messages[3]);
         $this->assertEquals(new AIMessage("AIです"), $messages[3]);
@@ -173,7 +175,7 @@ class ChatPromptTemplateTest extends TestCase
     public function test_canConvertToLogFormat() {
         $prompt_value = new ChatPromptValue([
             new SystemMessage("あなたは 英語 を フランス語 に翻訳するアシスタントです。"),
-            new HumanMessage("以下の 英語 を翻訳してください。また200文字以内に収めてください。"),
+            new DeveloperMessage("以下の 英語 を翻訳してください。また200文字以内に収めてください。"),
             new HumanMessage("I love cats.", "alice"),
             new AIMessage("J'aime les chats.")
         ]);
@@ -182,14 +184,17 @@ class ChatPromptTemplateTest extends TestCase
         $expected = <<<EOL
 (system): あなたは 英語 を フランス語 に翻訳するアシスタントです。
 
-(human): 以下の 英語 を翻訳してください。また200文字以内に収めてください。
+(developer): 以下の 英語 を翻訳してください。また200文字以内に収めてください。
 
 (human)alice: I love cats.
 
 (ai): J'aime les chats.
 
 EOL;
-        $this->assertSame($expected, $result);
+
+        $this->assertSame(
+            str_replace(["\r\n", "\r"], "\n", $expected),
+            str_replace(["\r\n", "\r"], "\n", $result)
+        );
     }
 }
-
