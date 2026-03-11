@@ -10,6 +10,7 @@ use Clair\Ai\ChatAi\Message\DeveloperMessage;
 use Clair\Ai\ChatAi\Message\HumanMessage;
 use Clair\Ai\ChatAi\Message\SystemMessage;
 use Clair\Ai\ChatAi\Message\ToolMessage;
+use Clair\Ai\ChatAi\Message\UserMessage;
 use Clair\Ai\ChatAi\Prompt\ChatPromptValue;
 
 use Clair\Ai\ChatAi\Tool\Tool;
@@ -21,9 +22,11 @@ class OpenAIChatCompletion implements ChatLLM
 
     public function __construct(
         private readonly Client $client,
-    ) {}
+    )
+    {
+    }
 
-    public static function from(string $api_key) :self
+    public static function from(string $api_key): self
     {
         return new self(OpenAI::client($api_key));
     }
@@ -36,7 +39,7 @@ class OpenAIChatCompletion implements ChatLLM
      * @param Tool[]|null $tools
      * @return LLMResult
      */
-    public function generate(array $params, ChatPromptValue $prompt, array $tools=null): LLMResult
+    public function generate(array $params, ChatPromptValue $prompt, array $tools = null): LLMResult
     {
         $params = new OpenAIChatCompletionParameters($params);
 
@@ -46,6 +49,13 @@ class OpenAIChatCompletion implements ChatLLM
         if (!is_null($tools)) {
             $request_arr["tools"] = array_map(fn($tool) => $tool->toRequestArr(), $tools);
         }
+
+
+        /*
+        echo "OpenAIChatCompletion::generate:\n";
+        print_r($request_arr);
+        */
+
 
         $response = $this->client->chat()->create($request_arr);
         return new OpenAIResult($response, $tools);
@@ -64,14 +74,20 @@ class OpenAIChatCompletion implements ChatLLM
 
             $convert_message_arr = match ($message::class) {
                 SystemMessage::class => $this->convertSystemMessageToArr($message),
+                HumanMessage::class => $this->convertHumanMessageToArr($message),
+                AIMessage::class => $this->convertAIMessageToArr($message),
+                ToolMessage::class => $this->convertToolMessageToArr($message),
                 DeveloperMessage::class => $this->convertDeveloperMessageToArr($message),
-                HumanMessage::class  => $this->convertHumanMessageToArr($message),
-                AIMessage::class     => $this->convertAIMessageToArr($message),
-                ToolMessage::class   => $this->convertToolMessageToArr($message)
+                UserMessage::class => $this->convertUserMessageToArr($message),
             };
 
             $request_messages_arr = array_merge($request_messages_arr, $convert_message_arr);
         }
+
+        /*
+        echo "OpenAIChatCompletion::convertChatPromptToArr:\n";
+        print_r($request_messages_arr);
+        */
 
         return $request_messages_arr;
     }
@@ -93,11 +109,6 @@ class OpenAIChatCompletion implements ChatLLM
         return [$arr];
     }
 
-    /**
-     * DeveloperMessageをopenAIでリクエストする形式で返す
-     * @param DeveloperMessage $message
-     * @return array
-     */
     public function convertDeveloperMessageToArr(DeveloperMessage $message): array
     {
         $text = $message->contents->convertAPIRequest($this)["text"];
@@ -202,6 +213,19 @@ class OpenAIChatCompletion implements ChatLLM
     {
         return ["type" => "text", "text" => $content_data["text"]];
     }
+
+    public function convertUserMessageToArr(UserMessage $message): array
+    {
+        $text = $message->contents->convertAPIRequest($this)["text"];
+        $arr = ["role" => "user", "content" => $text];
+        if (!is_null($message->name)) {
+            $arr["name"] = $message->name;
+        }
+
+        //messagesの中身として、配列でラップして返す
+        return [$arr];
+    }
+
 
     /**
      * @param array{image_url: string, data: string, image_type: string} $content_data
