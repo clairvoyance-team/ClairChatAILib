@@ -8,6 +8,9 @@ use Clair\Ai\ChatAi\Prompt\Exception\MissingInputVariablesException;
 use Clair\Ai\ChatAi\Message\DeveloperMessage;
 use Clair\Ai\ChatAi\Prompt\DeveloperMessagePromptTemplate;
 
+use Clair\Ai\ChatAi\Message\UserMessage;
+use Clair\Ai\ChatAi\Prompt\UserMessagePromptTemplate;
+
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
 
@@ -110,6 +113,51 @@ class MessagePromptTest extends TestCase
         $input_variables = ["info", "level"];
         $test_result = $message_template->formatMessages($input_variables);
         $expected_obj[] = new DeveloperMessage("開発者向け: すべて正常です。");
+        $this->assertEquals($expected_obj, $test_result);
+    }
+
+    #[TestDox("正しいテンプレート変数の取得（UserMessage）")]
+    public function test_isCorrectVariable_UserMessage() {
+        $template = "ユーザー: {username} ({age})";
+        $message_template = new UserMessagePromptTemplate($template);
+
+        $expected_variables = ["username", "age"];
+        $this->assertSame($expected_variables, $message_template->input_variables);
+    }
+
+    #[TestDox("テンプレート変数に入力値を代入したUserMessageが返される")]
+    public function test_canAssign_UserMessage() {
+        $template = "ユーザー: {username} ({age})";
+        $message_template = new UserMessagePromptTemplate($template);
+
+        $input_variables = ["username" => "bob", "age" => "30"];
+        $expected_obj = new UserMessage("ユーザー: bob (30)");
+
+        $test_result = $message_template->formatMessages($input_variables);
+        $target = $test_result[0];
+        $this->assertInstanceOf(UserMessage::class, $target);
+        $this->assertEquals($expected_obj, $target);
+    }
+
+    #[TestDox("テンプレート変数に対して入力値が足りなければエラーが出る（UserMessage）")]
+    public function test_throwIfArgumentMissing_UserMessage() {
+        $this->expectException(MissingInputVariablesException::class);
+
+        $template = "ユーザー: {username} ({age})";
+        $message_template = new UserMessagePromptTemplate($template);
+
+        $input_variables = ["username" => "bob"];
+        $message_template->formatMessages($input_variables);
+    }
+
+    #[TestDox("テンプレート変数がなくてもOK（UserMessage）")]
+    public function test_isNothingVariable_UserMessage() {
+        $template = "ユーザー: こんにちは。";
+        $message_template = new UserMessagePromptTemplate($template);
+
+        $input_variables = ["username", "age"];
+        $test_result = $message_template->formatMessages($input_variables);
+        $expected_obj[] = new UserMessage("ユーザー: こんにちは。");
         $this->assertEquals($expected_obj, $test_result);
     }
 }
