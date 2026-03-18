@@ -44,13 +44,14 @@ class LocalLLMCompletion implements ChatLLM
         $request_arr = $params_obj->toRequestArr();
         $request_arr["model"] = $params_obj->model;
         $request_arr["messages"] = $this->convertChatPromptToArr($prompt);
-        $request_arr["streaming_response"] = $this->streaming_response;
+
 
         if (!is_null($tools)) {
             $request_arr["tools"] = array_map(fn($tool) => $tool->toRequestArr(), $tools);
         }
 
-        if($request_arr['streaming_response']) {
+        if($this->streaming_response) {
+            $request_arr["stream"] = $this->streaming_response;
             $stream = $this->client->chat()->createStreamed($request_arr);
             return new OpenAIStreamResult($stream, $tools);
         } else {
@@ -118,12 +119,22 @@ class LocalLLMCompletion implements ChatLLM
             $convert_contents[] = $content->convertAPIRequest($this);
         }
 
-        $arr = ["role" => "user", "content" => $convert_contents];
+        // --- ここから修正 ---
+        // もしコンテンツが1つだけで、それがテキストなら文字列として取り出す
+        // これにより curl と同じ {"role": "user", "content": "文字列"} の形になります
+        if (count($convert_contents) === 1 && isset($convert_contents[0]['type']) && $convert_contents[0]['type'] === 'text') {
+            $content_payload = $convert_contents[0]['text'];
+        } else {
+            // 画像などがある場合はそのまま配列で送る
+            $content_payload = $convert_contents;
+        }
+        // --- ここまで修正 ---
+
+        $arr = ["role" => "user", "content" => $content_payload];
         if (!is_null($message->name)) {
             $arr["name"] = $message->name;
         }
 
-        //messagesの中身として、配列でラップして返す
         return [$arr];
     }
 
