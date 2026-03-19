@@ -29,7 +29,7 @@ class LocalLLMCompletionParameters implements Parameters
 
     public readonly null|string|array $stop;
 
-    public readonly ?float $temprature;
+    public readonly ?float $temperature;
 
     public readonly ?float $top_p;
 
