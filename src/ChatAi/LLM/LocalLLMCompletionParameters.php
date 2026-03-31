@@ -45,11 +45,13 @@ class LocalLLMCompletionParameters implements Parameters
         }
 
         // readonly の場合、ループの外で一度初期値を決めておかないと「未初期化エラー」になる
+        /* これするとパラメータが渡せなくなってしまうので
         $defaultValues = get_class_vars(self::class);
         foreach ($defaultValues as $key => $defaultValue) {
             if ($key === 'model') continue;
             $this->$key = null;
-        }
+        }*/
+        unset($params["model"]);//local llm仕様により
 
         // 2. 渡された値を流し込む
         foreach ($params as $key => $value) {

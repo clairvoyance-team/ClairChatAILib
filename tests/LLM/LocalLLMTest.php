@@ -92,7 +92,7 @@ class LocalLLMTest extends TestCase
 
     #[TestDox("テキスト単体の会話")]
     public function test_plain() {
-        $ChatAi = new ChatAi($this->openAIChat, ["model" => "huihui-ai/Qwen2.5-14B-Instruct-abliterated-v2"]);
+        $ChatAi = new ChatAi($this->openAIChat, ["model" => "huihui-ai/Qwen2.5-14B-Instruct-abliterated-v2", "temperature" => 0.3]);
         $response = $ChatAi->send("沖縄のおすすめの料理を教えて");
         $response_text = $response->getContents();
         echo $response_text;
