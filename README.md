@@ -360,6 +360,12 @@ prompt_value = new ChatPromptValue([
 ]);
 $result = $this->openAIChat->convertChatPromptToArr($prompt_value, $tools);
 ```
+## LocalLLMCompletion
+
+```php
+$llm = LocalLLMCompletion::from("http://118.238.8.76:8080/v1","blackwell");
+$response = $llm->send("沖縄のおすすめの料理を教えて");
+```
 
 # 開発tips
 以下でテストができる
