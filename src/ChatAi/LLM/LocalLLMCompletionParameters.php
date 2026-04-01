@@ -44,6 +44,8 @@ class LocalLLMCompletionParameters implements Parameters
             throw new InvalidParameterException("モデル名は必須です");
         }
 
+
+
         // readonly の場合、ループの外で一度初期値を決めておかないと「未初期化エラー」になる
         /* これするとパラメータが渡せなくなってしまうので
         $defaultValues = get_class_vars(self::class);
