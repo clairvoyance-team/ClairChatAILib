@@ -53,7 +53,6 @@ class LocalLLMCompletionParameters implements Parameters
             if ($key === 'model') continue;
             $this->$key = null;
         }*/
-        unset($params["model"]);//local llm仕様により
 
         // 2. 渡された値を流し込む
         foreach ($params as $key => $value) {
