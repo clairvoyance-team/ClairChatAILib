@@ -1,8 +1,10 @@
 <?php
 
-namespace Clair\Ai\ChatAi\LLM;
+namespace Clair\Ai\ChatAi\LLM\LocalLLM;
 
-use Clair\Ai\ChatAi\LLM\Exception\InvalidParameterException;
+
+use Clair\Ai\ChatAi\LLM\ChatLLM;
+use Clair\Ai\ChatAi\LLM\LLMResult;
 use Clair\Ai\ChatAi\Message\AIMessage;
 use Clair\Ai\ChatAi\Message\Content\TextContent;
 use Clair\Ai\ChatAi\Message\Content\ToolCallingContent;
@@ -12,13 +14,14 @@ use Clair\Ai\ChatAi\Message\SystemMessage;
 use Clair\Ai\ChatAi\Message\ToolMessage;
 use Clair\Ai\ChatAi\Message\UserMessage;
 use Clair\Ai\ChatAi\Prompt\ChatPromptValue;
-
-use Clair\Ai\ChatAi\Tool\Tool;
 use OpenAI;
 use OpenAI\Client;
+use Clair\Ai\ChatAi\LLM\LocalLLM\LocalLLMApiException;
 
-class OpenAIChatCompletion implements ChatLLM
+class LocalLLMCompletion implements ChatLLM
 {
+
+    public bool $streaming_response = false;
 
     public function __construct(
         private readonly Client $client,
@@ -26,46 +29,48 @@ class OpenAIChatCompletion implements ChatLLM
     {
     }
 
-    public static function from(string $api_key): self
+    public static function from(string $url, string $api_key): self
     {
-        return new self(OpenAI::client($api_key));
+        $client = OpenAI::factory()
+            ->withBaseUri($url)
+            ->withApiKey($api_key)
+            ->make();
+        return new self($client);
     }
 
-
-    /**
-     * ユーザは主にこの関数を使う
-     * @param array $params
-     * @param ChatPromptValue $prompt
-     * @param Tool[]|null $tools
-     * @return LLMResult
-     */
     public function generate(array $params, ChatPromptValue $prompt, array $tools = null): LLMResult
     {
-        $params = new OpenAIChatCompletionParameters($params);
+        $params_obj = new LocalLLMCompletionParameters($params);
 
-        $request_arr = $params->toRequestArr();
-        $request_arr["model"] = $params->model;
+        $request_arr = $params_obj->toRequestArr();
+        $request_arr["model"] = $params_obj->model;
         $request_arr["messages"] = $this->convertChatPromptToArr($prompt);
+
+
         if (!is_null($tools)) {
             $request_arr["tools"] = array_map(fn($tool) => $tool->toRequestArr(), $tools);
         }
-
-
-        /*
-        echo "OpenAIChatCompletion::generate:\n";
-        print_r($request_arr);
-        */
-
-
-        $response = $this->client->chat()->create($request_arr);
-        return new OpenAIResult($response, $tools);
+        try {
+            if ($this->streaming_response) {
+                $request_arr["stream"] = $this->streaming_response;
+                $stream = $this->client->chat()->createStreamed($request_arr);
+                return new LocalLLMStreamResult($stream, $tools);
+            } else {
+                $response = $this->client->chat()->create($request_arr);
+                // choicesがnullや配列でなければ例外
+                if (!isset($response->choices) || !is_array($response->choices)) {
+                    throw new LocalLLMApiException('LocalLLM API error: choices is null or not array', 0, $response);
+                }
+                return new LocalLLMResult($response, $tools);
+            }
+        } catch (\Throwable $e) {
+            // TypeErrorやOpenAIクライアント、Guzzleの例外をLocalLLMApiExceptionでラップ
+            $statusCode = method_exists($e, 'getCode') ? $e->getCode() : 0;
+            $body = method_exists($e, 'getResponse') && $e->getResponse() ? (string)$e->getResponse()->getBody() : null;
+            throw new LocalLLMApiException('LocalLLM API error: ' . $e->getMessage(), $statusCode, $body, $e);
+        }
     }
 
-    /**
-     * プロンプトをAPIで投げる形式に変換する
-     * @param ChatPromptValue $prompt
-     * @return array|array[]
-     */
     public function convertChatPromptToArr(ChatPromptValue $prompt): array
     {
         //APIリクエストのmessages用のArr
@@ -84,19 +89,9 @@ class OpenAIChatCompletion implements ChatLLM
             $request_messages_arr = array_merge($request_messages_arr, $convert_message_arr);
         }
 
-        /*
-        echo "OpenAIChatCompletion::convertChatPromptToArr:\n";
-        print_r($request_messages_arr);
-        */
-
         return $request_messages_arr;
     }
 
-    /**
-     * SystemMessageをopenAIでリクエストする形式で返す
-     * @param SystemMessage $message
-     * @return array
-     */
     public function convertSystemMessageToArr(SystemMessage $message): array
     {
         $text = $message->contents->convertAPIRequest($this)["text"];
@@ -112,7 +107,7 @@ class OpenAIChatCompletion implements ChatLLM
     public function convertDeveloperMessageToArr(DeveloperMessage $message): array
     {
         $text = $message->contents->convertAPIRequest($this)["text"];
-        $arr = ["role" => "developer", "content" => $text];
+        $arr = ["role" => "system", "content" => $text]; // localLLMはdevelopperのroleないのです
         if (!is_null($message->name)) {
             $arr["name"] = $message->name;
         }
@@ -134,12 +129,22 @@ class OpenAIChatCompletion implements ChatLLM
             $convert_contents[] = $content->convertAPIRequest($this);
         }
 
-        $arr = ["role" => "user", "content" => $convert_contents];
+        // --- ここから修正 ---
+        // もしコンテンツが1つだけで、それがテキストなら文字列として取り出す
+        // これにより curl と同じ {"role": "user", "content": "文字列"} の形になります
+        if (count($convert_contents) === 1 && isset($convert_contents[0]['type']) && $convert_contents[0]['type'] === 'text') {
+            $content_payload = $convert_contents[0]['text'];
+        } else {
+            // 画像などがある場合はそのまま配列で送る
+            $content_payload = $convert_contents;
+        }
+        // --- ここまで修正 ---
+
+        $arr = ["role" => "user", "content" => $content_payload];
         if (!is_null($message->name)) {
             $arr["name"] = $message->name;
         }
 
-        //messagesの中身として、配列でラップして返す
         return [$arr];
     }
 
@@ -257,4 +262,6 @@ class OpenAIChatCompletion implements ChatLLM
             ]
         ];
     }
+
+
 }

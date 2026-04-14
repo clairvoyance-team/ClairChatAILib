@@ -3,6 +3,7 @@ namespace Clair\Ai\ChatAi\LLM;
 
 enum StopReason
 {
+    // Common
     case End;
 
     case MaxTokens;
@@ -14,4 +15,9 @@ enum StopReason
     case ToolCall;
 
     case Uncompleted;
+
+    // Gemini
+    case Safety;
+    case ContentFilter;
+
 }

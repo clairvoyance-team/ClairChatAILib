@@ -1,7 +1,10 @@
 <?php
 
-namespace Clair\Ai\ChatAi\LLM;
+namespace Clair\Ai\ChatAi\LLM\OpenAi;
 
+use Clair\Ai\ChatAi\LLM\LLMResult;
+use Clair\Ai\ChatAi\LLM\LLMResultChoice;
+use Clair\Ai\ChatAi\LLM\StopReason;
 use Clair\Ai\ChatAi\Tool\Tool;
 use DateTime;
 use OpenAI\Responses\Chat\CreateResponse;

@@ -7,10 +7,12 @@
         "openai-php/client": "^0.19.1",
         "symfony/http-client": "^7.0",
         "nyholm/psr7": "^1.8",
-        "php-http/discovery": "^1.20"
+        "php-http/discovery": "^1.20",
+        "vlucas/phpdotenv": "^5.6",
+        "guzzlehttp/guzzle": "^7.9"
     },
     "require-dev": {
-        "phpunit/phpunit": "^11.1",
+        "phpunit/phpunit": "^11.5",
         "monolog/monolog": "^3.6",
         "psy/psysh": "^0.12.3"
     },
@@ -36,5 +38,11 @@
         "sort-packages": true
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "repositories": {
+        "clairvoyance/chat-ai-lib": {
+            "type": "vcs",
+            "url": "https://github.com/clairvoyance-team/ClairChatAILib"
+        }
+    }
 }

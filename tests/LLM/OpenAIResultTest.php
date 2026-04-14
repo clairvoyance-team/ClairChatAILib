@@ -1,10 +1,9 @@
 <?php
 namespace tests\LLM;
 
-use Clair\Ai\ChatAi\LLM\OpenAIResponseChoice;
-use Clair\Ai\ChatAi\LLM\OpenAIResult;
+use Clair\Ai\ChatAi\LLM\OpenAi\OpenAIResponseChoice;
+use Clair\Ai\ChatAi\LLM\OpenAi\OpenAIResult;
 use Clair\Ai\ChatAi\Message\AIMessage;
-
 use Clair\Ai\ChatAi\Message\Content\ToolCallingContent;
 use Clair\Ai\ChatAi\Tool\JSONTypeEnum;
 use Clair\Ai\ChatAi\Tool\ToolFunction;

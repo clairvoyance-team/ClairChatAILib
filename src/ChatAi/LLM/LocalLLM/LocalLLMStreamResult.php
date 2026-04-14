@@ -1,13 +1,14 @@
 <?php
 
-namespace Clair\Ai\ChatAi\LLM;
+namespace Clair\Ai\ChatAi\LLM\LocalLLM;
 
+use Clair\Ai\ChatAi\LLM\LLMResult;
 use DateTime;
 use IteratorAggregate;
 use OpenAI\Responses\StreamResponse;
 
 
-class OpenAIStreamResult implements LLMResult, IteratorAggregate
+class LocalLLMStreamResult implements LLMResult, IteratorAggregate
 {
     /**
      * @param StreamResponse $stream OpenAI SDKから返ってくるストリームオブジェクト

@@ -1,9 +1,13 @@
 <?php
 
-namespace Clair\Ai\ChatAi\LLM;
+namespace Clair\Ai\ChatAi\LLM\Gemini;
 
 
-use Clair\Ai\ChatAi\Prompt\ChatPromptValue;
+use Clair\Ai\ChatAi\LLM\ChatLLM;
+use Clair\Ai\ChatAi\LLM\LLMResult;
+use Clair\Ai\ChatAi\LLM\LocalLLM\LocalLLMCompletionParameters;
+use Clair\Ai\ChatAi\LLM\LocalLLM\LocalLLMResult;
+use Clair\Ai\ChatAi\LLM\LocalLLM\LocalLLMStreamResult;
 use Clair\Ai\ChatAi\Message\AIMessage;
 use Clair\Ai\ChatAi\Message\Content\TextContent;
 use Clair\Ai\ChatAi\Message\Content\ToolCallingContent;
@@ -12,54 +16,82 @@ use Clair\Ai\ChatAi\Message\HumanMessage;
 use Clair\Ai\ChatAi\Message\SystemMessage;
 use Clair\Ai\ChatAi\Message\ToolMessage;
 use Clair\Ai\ChatAi\Message\UserMessage;
-use Clair\Ai\ChatAi\LLM\LocalLLMCompletionParameters;
-
+use Clair\Ai\ChatAi\Prompt\ChatPromptValue;
+use Clair\Ai\ChatAi\LLM\Gemini\GeminiApiException;
 use OpenAI;
 use OpenAI\Client;
 
-class LocalLLMCompletion implements ChatLLM
+class GeminiCompletion implements ChatLLM
 {
 
     public bool $streaming_response = false;
 
     public function __construct(
-        private readonly Client $client,
+        private readonly string $url,
+        private readonly string $api_key,
     )
     {
     }
 
     public static function from(string $url,string $api_key): self
     {
-        $client = OpenAI::factory()
-            ->withBaseUri($url)
-            ->withApiKey($api_key)
-            ->make();
-        return new self($client);
+        return new self($url, $api_key);
     }
 
     public function generate(array $params, ChatPromptValue $prompt, array $tools = null): LLMResult
     {
-        $params_obj = new LocalLLMCompletionParameters($params);
+        $params_obj = new GeminiCompletionParameters($params);
 
         $request_arr = $params_obj->toRequestArr();
         $request_arr["model"] = $params_obj->model;
         $request_arr["messages"] = $this->convertChatPromptToArr($prompt);
 
-
         if (!is_null($tools)) {
             $request_arr["tools"] = array_map(fn($tool) => $tool->toRequestArr(), $tools);
         }
 
-        if($this->streaming_response) {
-            $request_arr["stream"] = $this->streaming_response;
-            $stream = $this->client->chat()->createStreamed($request_arr);
-            return new OpenAIStreamResult($stream, $tools);
-        } else {
-            $response = $this->client->chat()->create($request_arr);
-            return new OpenAIResult($response, $tools);
+        $client = new \GuzzleHttp\Client();
+
+        $options = [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->api_key,
+                'Content-Type'  => 'application/json',
+            ],
+            'json' => [
+                'model'    => $request_arr["model"],
+                'messages' => $request_arr["messages"],
+                // SDKだとエラーになるような独自パラメータも自由に送れる
+            ],
+            'http_errors' => false, // 404などでも例外を投げずにレスポンスを取得する
+        ];
+
+        try {
+            $response = $client->post($this->url, $options);
+
+            $statusCode = $response->getStatusCode();
+            $body = (string) $response->getBody();
+            // ステータスコードが200番台以外はエラーとして扱う
+            if ($statusCode < 200 || $statusCode >= 300) {
+                $errorMsg = "Gemini API error: HTTP $statusCode";
+                // レスポンスボディがJSONなら詳細を付加
+                $errorDetail = $body;
+                try {
+                    $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+                    if (isset($json['error'])) {
+                        $errorDetail = $json['error'];
+                    }
+                } catch (\Throwable $e) {
+                    // JSONでなければそのまま
+                }
+                throw new GeminiApiException($errorMsg, $statusCode, $errorDetail);
+            }
+        } catch (\Exception $e) {
+            // 接続自体に失敗（タイムアウトやDNSエラーなど）した場合
+            throw new GeminiApiException('Connection error: ' . $e->getMessage(), 0, null, $e);
         }
 
-
+        $data = json_decode($body, false, 512, JSON_THROW_ON_ERROR);
+        return new GeminiResult($data, $tools);
     }
 
     public function convertChatPromptToArr(ChatPromptValue $prompt): array
@@ -97,7 +129,7 @@ class LocalLLMCompletion implements ChatLLM
     public function convertDeveloperMessageToArr(DeveloperMessage $message): array
     {
         $text = $message->contents->convertAPIRequest($this)["text"];
-        $arr = ["role" => "developer", "content" => $text];
+        $arr = ["role" => "system", "content" => $text]; // geminiはdevelopperのroleないのです
         if (!is_null($message->name)) {
             $arr["name"] = $message->name;
         }
