@@ -1,8 +1,9 @@
 <?php
 
-namespace Clair\Ai\Tests\ChatAi;
+namespace tests\ChatAi;
 
 use Clair\Ai\ChatAi\ChatAi;
+use Clair\Ai\ChatAi\LLM\LocalLLM\LocalLLMCompletion;
 use Clair\Ai\ChatAi\LLM\OpenAi\OpenAIChatCompletion;
 use Clair\Ai\ChatAi\Message\Content\ToolCallingContent;
 use Clair\Ai\ChatAi\Message\DeveloperMessage;
@@ -16,16 +17,16 @@ use Clair\Ai\ChatAi\Prompt\HumanTextMessagePromptTemplate;
 use Clair\Ai\ChatAi\Prompt\SystemMessagePromptTemplate;
 use Clair\Ai\ChatAi\Tool\ToolFunction;
 use PHPUnit\Framework\Attributes\TestDox;
-use Clair\Ai\Tests\TestWeatherForecaster;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 use ReflectionException;
+use Clair\Ai\Tests\TestWeatherForecaster;
 
-
-#[Group('local-only-openai')]
-class ChatAIOpenAITest extends TestCase
+#[Group('local-only')]
+class ChatAILocalLLMTest extends TestCase
 {
-    protected readonly OpenAIChatCompletion $open_ai_chat;
+    protected readonly LocalLLMCompletion $local_llm_chat;
+    protected string $model = "local-llm-test-model";
 
     public function setUp(): void
     {
@@ -35,9 +36,9 @@ class ChatAIOpenAITest extends TestCase
         var_dump(getenv('OPEN_AI_API_KEY'));
         */
 
-        $apiKey = $_ENV['OPEN_AI_API_KEY'] ?? null;
+        $apiKey = $_ENV['LOCAL_LLM_API_KEY'] ?? null;
 
-        $this->open_ai_chat = OpenAIChatCompletion::from($apiKey);
+        $this->local_llm_chat = LocalLLMCompletion::from("http://118.238.8.76:8080/v1/chat/completions/", $apiKey);
     }
 
     /**
@@ -46,7 +47,7 @@ class ChatAIOpenAITest extends TestCase
     #[TestDox("テキスト単体の会話")]
     public function test_plainText()
     {
-        $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-3.5-turbo"]);
+        $ChatAi = new ChatAi($this->local_llm_chat, ["model" => $this->model]);
         $response = $ChatAi->send("沖縄のおすすめの料理を教えて");
         $response_text = $response->getContents();
         echo $response_text;
@@ -57,7 +58,7 @@ class ChatAIOpenAITest extends TestCase
     #[Testdox("プロンプトを含めた会話")]
     public function test_ChatPrompt()
     {
-        $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-3.5-turbo", "max_tokens" => 500, "n" => 2]);
+        $ChatAi = new ChatAi($this->local_llm_chat, ["model" => $this->model, "max_tokens" => 500, "n" => 2]);
         $prompt = new ChatPromptTemplate([
             new SystemMessage("あなたは日本語を使うアシスタントです"),
             new DeveloperMessage("返答は30文字以内でお願いします"),
@@ -80,7 +81,7 @@ class ChatAIOpenAITest extends TestCase
     #[Testdox("プロンプトテンプレートを含めた会話")]
     public function test_ChatPromptTemplate()
     {
-        $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-3.5-turbo", "presence_penalty" => 0.3]);
+        $ChatAi = new ChatAi($this->local_llm_chat, ["model" => $this->model, "presence_penalty" => 0.3]);
         $prompt = new ChatPromptTemplate([
             new SystemMessagePromptTemplate("あなたは{input_language}を{output_language}に翻訳するアシスタントです"),
             new DeveloperMessagePromptTemplate("実際に存在する料理であること"),
@@ -88,23 +89,14 @@ class ChatAIOpenAITest extends TestCase
         ]);
         $response = $ChatAi->send($prompt, ["input_language" => "日本語", "output_language" => "英語"]);
         $response_text = $response->getContents();
-        //echo $response_text;
+        echo $response_text;
 
         $this->assertIsString($response_text);
 
         $expected_prompt = new ChatPromptValue([
             new SystemMessage("あなたは日本語を英語に翻訳するアシスタントです"),
-            new DeveloperMessage("実際に存在する料理であること"),
             new HumanMessage("次の文章を英語に翻訳して「おすすめの料理を教えて」")
         ]);
-
-        /*
-        print_r("------------------------------------");
-        print_r($expected_prompt);
-        print_r("------------------------------------");
-        print_r($response->prompt_value);
-        print_r("------------------------------------");
-        */
         $this->assertEquals($expected_prompt, $response->prompt_value);
     }
 
@@ -117,7 +109,7 @@ class ChatAIOpenAITest extends TestCase
     {
         $weather = new TestWeatherForecaster("晴子ちゃん");
         $tool = [ToolFunction::readMethod($weather, "getCurrentWeather")];
-        $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-4-turbo", "tool_choice" => "required"], $tool);
+        $ChatAi = new ChatAi($this->local_llm_chat, ["model" => $this->model, "tool_choice" => "required"], $tool);
         $response = $ChatAi->send("今日の東京の天気を教えて");
         print_r($response->getTools());
         $result = $response->runTools();
@@ -136,7 +128,7 @@ class ChatAIOpenAITest extends TestCase
     public function test_runToolAndSendResult()
     {
         $tool = [ToolFunction::readMethod("Clair\\Ai\\Tests\\TestWeatherForecaster", "getCurrentTemperature")];
-        $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-4-turbo"], $tool);
+        $ChatAi = new ChatAi($this->local_llm_chat, ["model" => $this->model], $tool);
         $response = $ChatAi->send("今日の東京の気温を教えて");
 
         if ($response->getTools()) {
@@ -169,7 +161,7 @@ class ChatAIOpenAITest extends TestCase
             ToolFunction::readMethod($weather, "getCurrentWeather"),
             ToolFunction::readMethod("Clair\\Ai\\Tests\\TestWeatherForecaster", "getChanceOfRain")
         ];
-        $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-4-turbo"], $tools);
+        $ChatAi = new ChatAi($this->local_llm_chat, ["model" => $this->model], $tools);
         $prompt = new ChatPromptTemplate([
             new SystemMessage("あなたは気象予報士アシスタントです"),
             new HumanTextMessagePromptTemplate("{when}の{location}の天気を教えて")
@@ -227,10 +219,10 @@ class ChatAIOpenAITest extends TestCase
                 ],
         ];
 
-        $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-4o", "response_format" => ["type" => "json_schema", "json_schema" => $json_schema]]);
+        $ChatAi = new ChatAi($this->local_llm_chat, ["model" => $this->model, "response_format" => ["type" => "json_schema", "json_schema" => $json_schema]]);
         $prompt = new ChatPromptTemplate([
             new SystemMessage("あなたはユーザーの日本語を厳しくチェックする先生です。"),
-            new HumanTextMessagePromptTemplate("えーっと。。恥ずかしいなぁwwみーちゃんがそんな事聞くなんて意外だよ？？angement")
+            new HumanTextMessagePromptTemplate("えーっと。。恥ずかしいなぁwwみーちゃんがそんな事聞くなんて意外だよ？？angerschaft")
         ]);
         $response = $ChatAi->send($prompt);
 

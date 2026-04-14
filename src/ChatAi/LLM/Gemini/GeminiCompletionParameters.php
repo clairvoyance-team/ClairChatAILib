@@ -1,10 +1,11 @@
 <?php
 
-namespace Clair\Ai\ChatAi\LLM;
+namespace Clair\Ai\ChatAi\LLM\Gemini;
 
 use Clair\Ai\ChatAi\LLM\Exception\InvalidParameterException;
+use Clair\Ai\ChatAi\LLM\Parameters;
 
-class LocalLLMCompletionParameters implements Parameters
+class GeminiCompletionParameters implements Parameters
 {
 
     public readonly string $model;

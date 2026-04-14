@@ -1,6 +1,7 @@
 <?php
-namespace Clair\Ai\ChatAi\LLM;
+namespace Clair\Ai\ChatAi\LLM\LocalLLM;
 
+use Clair\Ai\ChatAi\LLM\OpenAi\OpenAIResponseChoice;
 use Clair\Ai\ChatAi\Message\AIMessage;
 use Clair\Ai\ChatAi\Message\Content\ToolCallingContent;
 use Clair\Ai\ChatAi\Message\Message;
@@ -8,7 +9,7 @@ use Clair\Ai\ChatAi\Tool\Tool;
 use Clair\Ai\ChatAi\Tool\ToolType;
 use OpenAI\Responses\Chat\CreateResponseChoice;
 
-class OpenAIResponseChoice
+class LocalLLMResponseChoice
 {
 
     public function __construct(
@@ -23,7 +24,7 @@ class OpenAIResponseChoice
      * @param Tool[] $tools
      * @return OpenAIResponseChoice
      */
-    public static function fromCreateResponseChoice(CreateResponseChoice $choice, array|null $tools): OpenAIResponseChoice
+    public static function fromCreateResponseChoice(CreateResponseChoice $choice, array|null $tools): LocalLLMResponseChoice
     {
         if ($choice->message->toolCalls && !is_null($tools)) {
             //ツール呼び出しの場合

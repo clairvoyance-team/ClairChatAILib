@@ -1,7 +1,7 @@
 <?php
 namespace tests\LLM;
 
-use Clair\Ai\ChatAi\LLM\OpenAIChatCompletion;
+use Clair\Ai\ChatAi\LLM\OpenAi\OpenAIChatCompletion;
 use Clair\Ai\ChatAi\Message\AIMessage;
 use Clair\Ai\ChatAi\Message\Content\ImageContent;
 use Clair\Ai\ChatAi\Message\Content\TextContent;

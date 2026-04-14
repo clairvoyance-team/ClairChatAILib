@@ -3,17 +3,14 @@
 namespace tests\LLM;
 
 use Clair\Ai\ChatAi\ChatAi;
-use Clair\Ai\ChatAi\LLM\LocalLLMCompletion;
-
+use Clair\Ai\ChatAi\LLM\LocalLLM\LocalLLMCompletion;
 use Clair\Ai\ChatAi\Message\AIMessage;
 use Clair\Ai\ChatAi\Message\Content\TextContent;
 use Clair\Ai\ChatAi\Message\DeveloperMessage;
 use Clair\Ai\ChatAi\Message\HumanMessage;
 use Clair\Ai\ChatAi\Message\SystemMessage;
-
 use Clair\Ai\ChatAi\Prompt\ChatPromptValue;
 use Clair\Ai\ChatAi\Prompt\Exception\MissingInputVariablesException;
-
 use OpenAI;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
@@ -90,6 +87,7 @@ class LocalLLMTest extends TestCase
         $this->assertSame($expected, $result);
     }
 
+    /* 実際の送信はChatAi/でやる
     #[TestDox("テキスト単体の会話")]
     public function test_plain() {
         $ChatAi = new ChatAi($this->openAIChat, ["model" => "huihui-ai/Qwen2.5-14B-Instruct-abliterated-v2", "temperature" => 0.3]);
@@ -98,5 +96,5 @@ class LocalLLMTest extends TestCase
         echo $response_text;
 
         $this->assertIsString($response_text);
-    }
+    }*/
 }

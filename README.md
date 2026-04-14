@@ -368,9 +368,32 @@ $response = $llm->send("沖縄のおすすめの料理を教えて");
 ```
 
 # 開発tips
+
+## APIキーの管理
+APIキーはnv.testingファイルに書いて、`getenv()`で呼び出す
+
+```.env.testing
+OPEN_AI_API_KEY=xxxxx
+GEMINI_API_KEY=xxxxxx
+LOCAL_LLM_API_KEY=xxxxxx
+```
+
+## テストの書き方
+APIを叩く系のテストはローカルでのみ実行するよう下の記述を付けてください。
+```aiignore
+#[Group('local-only')]
+class ChatAIOpenAITest extends TestCase
+```
+
+
 以下でテストができる
 ```shell
+# 全部
 ./vendor/bin/phpunit --testdox tests
+# local-onlyのみ
+./vendor/bin/phpunit --group local-only
+# local-onlyを除外
+./vendor/bin/phpunit --testdox tests --exclude-group local-only
 ```
 
 ブラウザ等はないので、基本的にテストコードで開発していく
