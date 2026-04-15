@@ -129,7 +129,7 @@ class GeminiCompletion implements ChatLLM
     public function convertDeveloperMessageToArr(DeveloperMessage $message): array
     {
         $text = $message->contents->convertAPIRequest($this)["text"];
-        $arr = ["role" => "system", "content" => $text]; // geminiはdevelopperのroleないのです
+        $arr = ["role" => "developer", "content" => $text];
         if (!is_null($message->name)) {
             $arr["name"] = $message->name;
         }

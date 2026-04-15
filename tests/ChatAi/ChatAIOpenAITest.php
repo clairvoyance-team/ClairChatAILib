@@ -22,7 +22,7 @@ use PHPUnit\Framework\Attributes\Group;
 use ReflectionException;
 
 
-#[Group('local-only-openai')]
+#[Group('local-only')]
 class ChatAIOpenAITest extends TestCase
 {
     protected readonly OpenAIChatCompletion $open_ai_chat;
