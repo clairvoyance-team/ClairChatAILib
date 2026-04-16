@@ -3,8 +3,8 @@
 namespace Clair\Ai\ChatAi\LLM\LocalLLM;
 
 use Clair\Ai\ChatAi\LLM\LLMResult;
+use Clair\Ai\ChatAi\LLM\StopReason;
 use Clair\Ai\ChatAi\LLM\LLMResultChoice;
-use Clair\Ai\ChatAi\LLM\OpenAi\OpenAIResponseChoice;
 use Clair\Ai\ChatAi\Tool\Tool;
 use DateTime;
 use OpenAI\Responses\Chat\CreateResponse;
