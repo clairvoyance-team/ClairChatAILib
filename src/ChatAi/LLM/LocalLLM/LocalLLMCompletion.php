@@ -47,6 +47,7 @@ class LocalLLMCompletion implements ChatLLM
         $request_arr["messages"] = $this->convertChatPromptToArr($prompt);
 
 
+
         if (!is_null($tools)) {
             $request_arr["tools"] = array_map(fn($tool) => $tool->toRequestArr(), $tools);
         }
@@ -56,6 +57,7 @@ class LocalLLMCompletion implements ChatLLM
                 $stream = $this->client->chat()->createStreamed($request_arr);
                 return new LocalLLMStreamResult($stream, $tools);
             } else {
+                $request_arr["response_format"] = ['type' => 'json_object'];
                 $response = $this->client->chat()->create($request_arr);
                 // choicesがnullや配列でなければ例外
                 if (!isset($response->choices) || !is_array($response->choices)) {
