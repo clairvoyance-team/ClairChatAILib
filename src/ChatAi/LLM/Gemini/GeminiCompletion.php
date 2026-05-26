@@ -46,6 +46,7 @@ class GeminiCompletion implements ChatLLM
         $request_arr["model"] = $params_obj->model;
         $request_arr["messages"] = $this->convertChatPromptToArr($prompt);
 
+
         if (!is_null($tools)) {
             $request_arr["tools"] = array_map(fn($tool) => $tool->toRequestArr(), $tools);
         }
@@ -60,6 +61,9 @@ class GeminiCompletion implements ChatLLM
             'json' => [
                 'model'    => $request_arr["model"],
                 'messages' => $request_arr["messages"],
+                'response_format' => [
+                    'type' => 'json_object'
+                ],
                 // SDKだとエラーになるような独自パラメータも自由に送れる
             ],
             'http_errors' => false, // 404などでも例外を投げずにレスポンスを取得する
