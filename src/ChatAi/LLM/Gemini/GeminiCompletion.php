@@ -61,8 +61,8 @@ class GeminiCompletion implements ChatLLM
             'json' => [
                 'model'    => $request_arr["model"],
                 'messages' => $request_arr["messages"],
-                'generationConfig' => [
-                    'responseMimeType' => 'application/json',
+                'response_format' => [
+                    'type' => 'json_object'
                 ],
                 // SDKだとエラーになるような独自パラメータも自由に送れる
             ],
