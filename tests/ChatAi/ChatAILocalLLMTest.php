@@ -26,7 +26,7 @@ use Clair\Ai\Tests\TestWeatherForecaster;
 class ChatAILocalLLMTest extends TestCase
 {
     protected readonly LocalLLMCompletion $local_llm_chat;
-    protected string $model = "local-llm-test-model";
+    protected string $model = "huihui-ai/Qwen2.5-14B-Instruct-abliterated-v2";
 
     public function setUp(): void
     {
@@ -37,8 +37,7 @@ class ChatAILocalLLMTest extends TestCase
         */
 
         $apiKey = $_ENV['LOCAL_LLM_API_KEY'] ?? null;
-
-        $this->local_llm_chat = LocalLLMCompletion::from("http://118.238.8.76:8080/v1/chat/completions/", $apiKey);
+        $this->local_llm_chat = LocalLLMCompletion::from("http://118.238.8.75:8080/v1/chat/completions/", $apiKey);
     }
 
     /**
@@ -50,7 +49,6 @@ class ChatAILocalLLMTest extends TestCase
         $ChatAi = new ChatAi($this->local_llm_chat, ["model" => $this->model]);
         $response = $ChatAi->send("沖縄のおすすめの料理を教えて");
         $response_text = $response->getContents();
-        echo $response_text;
 
         $this->assertIsString($response_text);
     }
@@ -89,7 +87,6 @@ class ChatAILocalLLMTest extends TestCase
         ]);
         $response = $ChatAi->send($prompt, ["input_language" => "日本語", "output_language" => "英語"]);
         $response_text = $response->getContents();
-        echo $response_text;
 
         $this->assertIsString($response_text);
 

@@ -31,11 +31,22 @@ class LocalLLMCompletion implements ChatLLM
 
     public static function from(string $url, string $api_key): self
     {
+        $normalized_url = self::normalizeBaseUri($url);
         $client = OpenAI::factory()
-            ->withBaseUri($url)
+            ->withBaseUri($normalized_url)
             ->withApiKey($api_key)
             ->make();
         return new self($client);
+    }
+
+    private static function normalizeBaseUri(string $url): string
+    {
+        $normalized = rtrim($url, '/');
+        if (str_ends_with($normalized, '/chat/completions')) {
+            $normalized = substr($normalized, 0, -strlen('/chat/completions'));
+        }
+
+        return $normalized;
     }
 
     public function generate(array $params, ChatPromptValue $prompt, array $tools = null): LLMResult
@@ -57,7 +68,6 @@ class LocalLLMCompletion implements ChatLLM
                 $stream = $this->client->chat()->createStreamed($request_arr);
                 return new LocalLLMStreamResult($stream, $tools);
             } else {
-                $request_arr["response_format"] = ['type' => 'json_object'];
                 $response = $this->client->chat()->create($request_arr);
                 // choicesがnullや配列でなければ例外
                 if (!isset($response->choices) || !is_array($response->choices)) {
@@ -69,7 +79,11 @@ class LocalLLMCompletion implements ChatLLM
             // TypeErrorやOpenAIクライアント、Guzzleの例外をLocalLLMApiExceptionでラップ
             $statusCode = method_exists($e, 'getCode') ? $e->getCode() : 0;
             $body = method_exists($e, 'getResponse') && $e->getResponse() ? (string)$e->getResponse()->getBody() : null;
-            throw new LocalLLMApiException('LocalLLM API error: ' . $e->getMessage(), $statusCode, $body, $e);
+            $message = 'LocalLLM API error: ' . $e->getMessage();
+            if (str_contains($e->getMessage(), 'array_map(): Argument #2 ($array) must be of type array, null given')) {
+                $message .= ' (base URIが /chat/completions まで含まれていないか、またはAPIレスポンスがOpenAI互換形式か確認してください)';
+            }
+            throw new LocalLLMApiException($message, $statusCode, $body, $e);
         }
     }
 
