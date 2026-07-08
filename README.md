@@ -407,3 +407,24 @@ class ChatAIOpenAITest extends TestCase
 ```
 
 ブラウザ等はないので、基本的にテストコードで開発していく
+
+# バージョン管理
+タグをつけてバージョン管理します
+
+```aiignore
+# タグを作成
+git tag -a v2.0.9 -m "add grok"
+# タグをremoteへプッシュ
+git push origin v2.0.9
+```
+
+### GitHubでリリースを作成
+
+タグをPushした後、
+
+```
+GitHub
+→ Releases
+→ Draft a new release
+→ Choose a tag（既存タグを選択、または新規作成）
+```
