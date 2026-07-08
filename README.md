@@ -367,6 +367,15 @@ $llm = LocalLLMCompletion::from("http://118.238.8.76:8080/v1","blackwell");
 $response = $llm->send("沖縄のおすすめの料理を教えて");
 ```
 
+## GrokCompletion
+
+```php
+$llm = GrokCompletion::from("GROK_API_KEY");
+$ChatAi = new ChatAi($llm, ["model" => "grok-3-mini"]);
+$response = $ChatAi->send("沖縄のおすすめの料理を教えて");
+$response_text = $response->getContents();
+```
+
 # 開発tips
 
 ## APIキーの管理
@@ -376,6 +385,7 @@ APIキーはnv.testingファイルに書いて、`getenv()`で呼び出す
 OPEN_AI_API_KEY=xxxxx
 GEMINI_API_KEY=xxxxxx
 LOCAL_LLM_API_KEY=xxxxxx
+GROK_API_KEY=xxxxx
 ```
 
 ## テストの書き方

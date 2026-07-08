@@ -119,9 +119,9 @@ class ChatAIOpenAITest extends TestCase
         $tool = [ToolFunction::readMethod($weather, "getCurrentWeather")];
         $ChatAi = new ChatAi($this->open_ai_chat, ["model" => "gpt-4-turbo", "tool_choice" => "required"], $tool);
         $response = $ChatAi->send("今日の東京の天気を教えて");
-        print_r($response->getTools());
+        //print_r($response->getTools());
         $result = $response->runTools();
-        print_r($result);
+        //print_r($result);
 
         $this->assertIsString($result[0]["tool_call_id"]);
         $this->assertIsString($result[0]["result"]);
@@ -147,13 +147,13 @@ class ChatAIOpenAITest extends TestCase
                 $this->assertInstanceOf(ToolCallingContent::class, $result->getTools()[0]);
             } else {
                 $this->assertIsString($result->getContents());
-                print_r($result->getContents());
+                //print_r($result->getContents());
             }
 
         } else {
             //テキストが返ってきたとき
             $this->assertIsString($response->getContents());
-            print_r($response->getContents());
+            //print_r($response->getContents());
         }
     }
 
