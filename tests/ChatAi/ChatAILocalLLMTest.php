@@ -37,7 +37,7 @@ class ChatAILocalLLMTest extends TestCase
         */
 
         $apiKey = $_ENV['LOCAL_LLM_API_KEY'] ?? null;
-        $this->local_llm_chat = LocalLLMCompletion::from("http://118.238.8.75:8080/v1/chat/completions/", $apiKey);
+        $this->local_llm_chat = LocalLLMCompletion::from("http://118.238.8.76:8080/v1/chat/completions/", $apiKey);
     }
 
     /**
@@ -82,7 +82,6 @@ class ChatAILocalLLMTest extends TestCase
         $ChatAi = new ChatAi($this->local_llm_chat, ["model" => $this->model, "presence_penalty" => 0.3]);
         $prompt = new ChatPromptTemplate([
             new SystemMessagePromptTemplate("あなたは{input_language}を{output_language}に翻訳するアシスタントです"),
-            new DeveloperMessagePromptTemplate("実際に存在する料理であること"),
             new HumanTextMessagePromptTemplate("次の文章を{output_language}に翻訳して「おすすめの料理を教えて」")
         ]);
         $response = $ChatAi->send($prompt, ["input_language" => "日本語", "output_language" => "英語"]);
@@ -94,6 +93,9 @@ class ChatAILocalLLMTest extends TestCase
             new SystemMessage("あなたは日本語を英語に翻訳するアシスタントです"),
             new HumanMessage("次の文章を英語に翻訳して「おすすめの料理を教えて」")
         ]);
+
+        //print_r($expected_prompt);
+
         $this->assertEquals($expected_prompt, $response->prompt_value);
     }
 
@@ -101,6 +103,7 @@ class ChatAILocalLLMTest extends TestCase
      * @throws ReflectionException
      * @throws MissingInputVariablesException
      */
+    /* ツール実行もローカルLLMではまだ使えない
     #[Testdox("ツール実行とツールを絶対に使用するように指定した会話")]
     public function test_ToolChat()
     {
@@ -108,19 +111,20 @@ class ChatAILocalLLMTest extends TestCase
         $tool = [ToolFunction::readMethod($weather, "getCurrentWeather")];
         $ChatAi = new ChatAi($this->local_llm_chat, ["model" => $this->model, "tool_choice" => "required"], $tool);
         $response = $ChatAi->send("今日の東京の天気を教えて");
-        print_r($response->getTools());
+        //print_r($response->getTools());
         $result = $response->runTools();
-        print_r($result);
+        //print_r($result);
 
         $this->assertIsString($result[0]["tool_call_id"]);
         $this->assertIsString($result[0]["result"]);
         $this->assertMatchesRegularExpression("/晴子ちゃん.+は晴れです/", $result[0]["result"]);
-    }
+    }*/
 
     /**
      * @throws ReflectionException
      * @throws MissingInputVariablesException
      */
+    /* local llm tool使えない
     #[Testdox("ツールを実行し結果をgptに送って返信を取得する")]
     public function test_runToolAndSendResult()
     {
@@ -136,20 +140,21 @@ class ChatAILocalLLMTest extends TestCase
                 $this->assertInstanceOf(ToolCallingContent::class, $result->getTools()[0]);
             } else {
                 $this->assertIsString($result->getContents());
-                print_r($result->getContents());
+                //print_r($result->getContents());
             }
 
         } else {
             //テキストが返ってきたとき
             $this->assertIsString($response->getContents());
-            print_r($response->getContents());
+            //print_r($response->getContents());
         }
-    }
+    }*/
 
     /**
      * @throws ReflectionException
      * @throws MissingInputVariablesException
      */
+    /* toolがつかえない
     #[Testdox("ツールとプロンプト+履歴を含めた会話")]
     public function test_ToolAndHistoryChat()
     {
@@ -179,14 +184,15 @@ class ChatAILocalLLMTest extends TestCase
             new HumanMessage("今日の東京の天気を教えて")
         ]);
         $this->assertEquals($expected_prompt, $response->prompt_value);
-    }
+    }*/
 
     /**
      * @throws ReflectionException
      * @throws MissingInputVariablesException
      */
+    /* JsonSchemaを使ったレスポンスなんてありません！
     #[Testdox("JsonSchemaを使ったレスポンス")]
-    public function test_JsonSchemaResponse()
+    public function _test_JsonSchemaResponse()
     {
         $json_schema = [
             'name' => 'check_non_japanese',
@@ -229,6 +235,6 @@ class ChatAILocalLLMTest extends TestCase
         $this->assertIsArray($json_array);
         $this->assertFalse($json_array["un_japanese"]);
         $this->assertIsInt($json_array["un_japanese_integer"]);
-    }
+    }*/
 
 }
