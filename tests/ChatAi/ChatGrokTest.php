@@ -21,16 +21,30 @@ class ChatGrokTest extends TestCase
 
     protected function setUp(): void
     {
-        $api_key = $_ENV['GROK_API_KEY'] ?? null;
+        $api_key = $_ENV['GROK_API_KEY'] ?? $_SERVER['GROK_API_KEY'] ?? getenv('GROK_API_KEY') ?: null;
         if (is_null($api_key) || $api_key === '') {
             $this->markTestSkipped('GROK_API_KEY が未設定のためスキップします。');
         }
 
-        if (!empty($_ENV['GROK_MODEL'])) {
-            $this->model = $_ENV['GROK_MODEL'];
+        $env_model = $_ENV['GROK_MODEL'] ?? $_SERVER['GROK_MODEL'] ?? getenv('GROK_MODEL') ?: null;
+        if (!empty($env_model)) {
+            $this->model = $env_model;
         }
 
         $this->grok_chat = GrokCompletion::from($api_key);
+    }
+
+    #[TestDox('Grok APIへの実接続確認ができる')]
+    public function test_realApiConnection(): void
+    {
+        $chat_ai = new ChatAi($this->grok_chat, ['model' => $this->model, 'max_tokens' => 80]);
+        $response = $chat_ai->send('接続確認です。必ず「OK」のみ返してください。');
+
+        $this->assertIsString($response->getContents());
+        $this->assertNotSame('', trim((string) $response->getContents()));
+        $this->assertNotSame('', $response->model_name);
+        $this->assertGreaterThanOrEqual(0, $response->input_token);
+        $this->assertGreaterThanOrEqual(0, $response->output_token);
     }
 
     #[TestDox('Grokでテキスト単体の会話ができる')]
