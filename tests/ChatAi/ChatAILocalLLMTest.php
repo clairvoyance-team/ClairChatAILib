@@ -16,6 +16,7 @@ use Clair\Ai\ChatAi\Prompt\Exception\MissingInputVariablesException;
 use Clair\Ai\ChatAi\Prompt\HumanTextMessagePromptTemplate;
 use Clair\Ai\ChatAi\Prompt\SystemMessagePromptTemplate;
 use Clair\Ai\ChatAi\Tool\ToolFunction;
+use OpenAI;
 use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
@@ -37,7 +38,15 @@ class ChatAILocalLLMTest extends TestCase
         */
 
         $apiKey = $_ENV['LOCAL_LLM_API_KEY'] ?? null;
-        $this->local_llm_chat = LocalLLMCompletion::from("http://118.238.8.76:8080/v1/chat/completions/", $apiKey);
+
+
+        //$this->local_llm_chat = LocalLLMCompletion::from("http://118.238.8.76:8080/v1/chat/completions/", $apiKey);
+
+        $this->local_llm_chat = new LocalLLMCompletion(
+            OpenAI::factory()
+                ->withBaseUri("http://118.238.8.76:8080/v1")
+                ->withApiKey($apiKey)
+                ->make());
     }
 
     /**
@@ -49,6 +58,7 @@ class ChatAILocalLLMTest extends TestCase
         $ChatAi = new ChatAi($this->local_llm_chat, ["model" => $this->model]);
         $response = $ChatAi->send("沖縄のおすすめの料理を教えて");
         $response_text = $response->getContents();
+        echo $response_text;
 
         $this->assertIsString($response_text);
     }
@@ -86,6 +96,7 @@ class ChatAILocalLLMTest extends TestCase
         ]);
         $response = $ChatAi->send($prompt, ["input_language" => "日本語", "output_language" => "英語"]);
         $response_text = $response->getContents();
+        echo $response_text;
 
         $this->assertIsString($response_text);
 
@@ -93,9 +104,6 @@ class ChatAILocalLLMTest extends TestCase
             new SystemMessage("あなたは日本語を英語に翻訳するアシスタントです"),
             new HumanMessage("次の文章を英語に翻訳して「おすすめの料理を教えて」")
         ]);
-
-        //print_r($expected_prompt);
-
         $this->assertEquals($expected_prompt, $response->prompt_value);
     }
 
@@ -103,7 +111,7 @@ class ChatAILocalLLMTest extends TestCase
      * @throws ReflectionException
      * @throws MissingInputVariablesException
      */
-    /* ツール実行もローカルLLMではまだ使えない
+    /* tool 使えないの！
     #[Testdox("ツール実行とツールを絶対に使用するように指定した会話")]
     public function test_ToolChat()
     {
@@ -111,9 +119,9 @@ class ChatAILocalLLMTest extends TestCase
         $tool = [ToolFunction::readMethod($weather, "getCurrentWeather")];
         $ChatAi = new ChatAi($this->local_llm_chat, ["model" => $this->model, "tool_choice" => "required"], $tool);
         $response = $ChatAi->send("今日の東京の天気を教えて");
-        //print_r($response->getTools());
+        print_r($response->getTools());
         $result = $response->runTools();
-        //print_r($result);
+        print_r($result);
 
         $this->assertIsString($result[0]["tool_call_id"]);
         $this->assertIsString($result[0]["result"]);
@@ -124,7 +132,7 @@ class ChatAILocalLLMTest extends TestCase
      * @throws ReflectionException
      * @throws MissingInputVariablesException
      */
-    /* local llm tool使えない
+    /* local llmではツール使えない
     #[Testdox("ツールを実行し結果をgptに送って返信を取得する")]
     public function test_runToolAndSendResult()
     {
@@ -140,13 +148,13 @@ class ChatAILocalLLMTest extends TestCase
                 $this->assertInstanceOf(ToolCallingContent::class, $result->getTools()[0]);
             } else {
                 $this->assertIsString($result->getContents());
-                //print_r($result->getContents());
+                print_r($result->getContents());
             }
 
         } else {
             //テキストが返ってきたとき
             $this->assertIsString($response->getContents());
-            //print_r($response->getContents());
+            print_r($response->getContents());
         }
     }*/
 
@@ -154,7 +162,7 @@ class ChatAILocalLLMTest extends TestCase
      * @throws ReflectionException
      * @throws MissingInputVariablesException
      */
-    /* toolがつかえない
+    /* local llmではtool使えない
     #[Testdox("ツールとプロンプト+履歴を含めた会話")]
     public function test_ToolAndHistoryChat()
     {
@@ -190,9 +198,9 @@ class ChatAILocalLLMTest extends TestCase
      * @throws ReflectionException
      * @throws MissingInputVariablesException
      */
-    /* JsonSchemaを使ったレスポンスなんてありません！
+    /* local JsonSchema　llmでは使えない
     #[Testdox("JsonSchemaを使ったレスポンス")]
-    public function _test_JsonSchemaResponse()
+    public function test_JsonSchemaResponse()
     {
         $json_schema = [
             'name' => 'check_non_japanese',
